@@ -1,0 +1,19 @@
+{
+  "name": "agricultural-farm-management-system",
+  "version": "1.0.0",
+  "description": "Smart Agricultural Farm Management System with Redis DA3 and Express + Next.js",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:backend": "npm --prefix backend run start",
+    "start:frontend": "npm --prefix frontend run start",
+    "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed",
+    "seed:dry-run": "npm --prefix backend run seed:dry-run"
+  },
+  "keywords": ["redis", "oracle", "agriculture", "da3", "nextjs", "express"],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,523 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\aksha> docker run -d --name redis -p 6379:6379 redis:<version>
+docker: invalid reference format
+
+Run 'docker run --help' for more information
+
+What's next:
+    Debug this container error with Gordon → docker ai "help me fix this container error"
+PS C:\Users\aksha> docker run -d --name redis -p 6379:6379 redis:latest
+Unable to find image 'redis:latest' locally
+latest: Pulling from library/redis
+4ac6ba6b019e: Pull complete
+0a3621ec1dd4: Pull complete
+f55e02ea8cde: Pull complete
+c30201c9cd3c: Pull complete
+dc611c1ed116: Pull complete
+ecc510c1e359: Pull complete
+4f4fb700ef54: Pull complete
+e6c2a7c7d56e: Download complete
+edf7d95c5d27: Download complete
+Digest: sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6
+Status: Downloaded newer image for redis:latest
+655d8065c41488affceaa6069b67c91df3e4b39c534538c2d1c43cc32235751c
+PS C:\Users\aksha> docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS                                         NAMES
+655d8065c414   redis:latest   "docker-entrypoint.s…"   22 seconds ago   Up 20 seconds   0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp   redis
+PS C:\Users\aksha> docker exec -it redis redis-cli
+127.0.0.1:6379> PING
+PONG
+127.0.0.1:6379> HSET farmer:101 name "Ramesh Kumar" address "Kanchipuram, Tamil Nadu" email "ramesh@example.com" phone "9876543210"
+(integer) 4
+127.0.0.1:6379> HGETALL farmer:101
+1) "name"
+2) "Ramesh Kumar"
+3) "address"
+4) "Kanchipuram, Tamil Nadu"
+5) "email"
+6) "ramesh@example.com"
+7) "phone"
+8) "9876543210"
+127.0.0.1:6379> HSET farm:201 name "Green Valley Farm" location "Kanchipuram" total_area 25.5 farmer_id 101
+(integer) 4
+127.0.0.1:6379> SADD farmer:101:farms 201
+(integer) 1
+127.0.0.1:6379> SMEMBERS farmer:101:farms
+1) "201"
+127.0.0.1:6379> HGETALL farm:201
+1) "name"
+2) "Green Valley Farm"
+3) "location"
+4) "Kanchipuram"
+5) "total_area"
+6) "25.5"
+7) "farmer_id"
+8) "101"
+127.0.0.1:6379> HSET field:301 name "North Field" farm_id 201 area 10.5 soil_type "Loamy"
+(integer) 4
+127.0.0.1:6379> SADD farm:201:fields 301
+(integer) 1
+127.0.0.1:6379> SMEMBERS farm:201:fields
+1) "301"
+127.0.0.1:6379> HSET soil_test:401 field_id 301 ph 6.5 nitrogen "Medium" phosphorus "High" potassium "Medium" tested_on "2026-10-01"
+(integer) 6
+127.0.0.1:6379> SADD field:301:soil_tests 401
+(integer) 1
+127.0.0.1:6379> HGETALL soil_test:401
+ 1) "field_id"
+ 2) "301"
+ 3) "ph"
+ 4) "6.5"
+ 5) "nitrogen"
+ 6) "Medium"
+ 7) "phosphorus"
+ 8) "High"
+ 9) "potassium"
+10) "Medium"
+11) "tested_on"
+12) "2026-10-01"
+127.0.0.1:6379> HSET water_source:501 farm_id 201 source_type "Borewell" status "Active"
+(integer) 3
+127.0.0.1:6379> SADD farm:201:water_sources 501
+(integer) 1
+127.0.0.1:6379> SMEMBERS farm:201:water_sources
+1) "501"
+127.0.0.1:6379> HSET irrigation:601 field_id 301 water_source_id 501 method"Drip" frequency "Daily"
+(integer) 4
+127.0.0.1:6379> SADD field:301:irrigation_systems 601
+(integer) 1
+127.0.0.1:6379>
+
+What's next:
+    Try Docker Debug for seamless, persistent debugging tools in any container or image → docker debug redis
+    Learn more at https://docs.docker.com/go/debug-cli/
+PS C:\Users\aksha> docker exec -it redis redis-cli
+127.0.0.1:6379> HSET crop:701 name "Rice" scientific_name "Oryza sativa" category "Cereal" duration_days 120
+(integer) 4
+127.0.0.1:6379> HSET crop:701 name "Rice" scientific_name "Oryza sativa" category "Cereal" duration_days 120
+(integer) 0
+127.0.0.1:6379> HSET crop_variety:801 crop_id 701 variety_name "Ponni" expected_yield_per_acre 2500
+(integer) 3
+127.0.0.1:6379> HSET crop_variety:801 crop_id 701 variety_name "Ponni" expected_yield_per_acre 2500
+(integer) 0
+127.0.0.1:6379> SADD crop:701:varieties 801
+(integer) 1
+127.0.0.1:6379> SMEMBERS crop:701:varieties
+1) "801"
+127.0.0.1:6379> HGETALL crop_variety:801
+1) "crop_id"
+2) "701"
+3) "variety_name"
+4) "Ponni"
+5) "expected_yield_per_acre"
+6) "2500"
+127.0.0.1:6379> HGETALL season:901
+(empty array)
+127.0.0.1:6379> HSET crop_season:1001 crop_id 701 season_id 901 farm_id 201field_id 301 year 2026 status "Planned"
+(integer) 6
+127.0.0.1:6379> SADD crop:701:seasons 1001
+(integer) 1
+127.0.0.1:6379> SADD season:901:crop_seasons 1001
+(integer) 1
+127.0.0.1:6379> SADD farm:201:crop_seasons 1001
+(integer) 1
+127.0.0.1:6379> HGETALL crop_season:1001
+ 1) "crop_id"
+ 2) "701"
+ 3) "season_id"
+ 4) "901"
+ 5) "farm_id"
+ 6) "201"
+ 7) "field_id"
+ 8) "301"
+ 9) "year"
+10) "2026"
+11) "status"
+12) "Planned"
+127.0.0.1:6379> HGETALL crop_season:1001
+ 1) "crop_id"
+ 2) "701"
+ 3) "season_id"
+ 4) "901"
+ 5) "farm_id"
+ 6) "201"
+ 7) "field_id"
+ 8) "301"
+ 9) "year"
+10) "2026"
+11) "status"
+12) "Planned"
+127.0.0.1:6379> SMEMBERS crop:701:seasons
+1) "1001"
+127.0.0.1:6379> SMEMBERS season:901:crop_seasons
+1) "1001"
+127.0.0.1:6379> HGET crop:701 duration_days
+"120"
+127.0.0.1:6379> HGET crop:701 duration_days 125
+(error) ERR wrong number of arguments for 'hget' command
+127.0.0.1:6379> HSET crop:701 duration_days 125
+(integer) 0
+127.0.0.1:6379> HGET crop:701 duration_days
+"125"
+127.0.0.1:6379> HSET crop:701 duration_days 125
+(integer) 0
+127.0.0.1:6379> HSET supplier:1101 name "Agri Supplies Ltd" address "Chennai" email "sales@agrisupplies.example"
+(integer) 3
+127.0.0.1:6379> HSET supplier_phone:1102 supplier_id 1101 phone "9876501234"
+(integer) 2
+127.0.0.1:6379> SADD supplier:1101:phones 1102
+(integer) 1
+127.0.0.1:6379> HGETALL supplier:1101
+1) "name"
+2) "Agri Supplies Ltd"
+3) "address"
+4) "Chennai"
+5) "email"
+6) "sales@agrisupplies.example"
+127.0.0.1:6379> HGETALL supplier_phone:1102
+1) "supplier_id"
+2) "1101"
+3) "phone"
+4) "9876501234"
+127.0.0.1:6379> HSET inventory_item:1201 name "Ponni Rice Seeds" category "Seed" quantity 500 unit "kg" supplier_id 1101
+
+(integer) 5
+127.0.0.1:6379> SADD supplier:1101:inventory_items 1201
+(integer) 1
+127.0.0.1:6379> HGETALL inventory_item:1201
+ 1) "name"
+ 2) "Ponni Rice Seeds"
+ 3) "category"
+ 4) "Seed"
+ 5) "quantity"
+ 6) "500"
+ 7) "unit"
+ 8) "kg"
+ 9) "supplier_id"
+10) "1101"
+127.0.0.1:6379> HSET seed:1301 inventory_item_id 1201 crop_id 701 variety_id 801 germination_rate 95 expiry_date "2027-06-30"
+(integer) 5
+127.0.0.1:6379> SADD inventory_item:1201:seeds 1301
+(integer) 1
+127.0.0.1:6379> HGETALL seed:1301
+ 1) "inventory_item_id"
+ 2) "1201"
+ 3) "crop_id"
+ 4) "701"
+ 5) "variety_id"
+ 6) "801"
+ 7) "germination_rate"
+ 8) "95"
+ 9) "expiry_date"
+10) "2027-06-30"
+127.0.0.1:6379> HSET fertilizer:1401 name "NPK Fertilizer" inventory_item_id 1201 nitrogen_percent 20 phosphorus_percent 20 potassium_percent 20
+(integer) 5
+127.0.0.1:6379> HGETALL fertilizer:1401
+ 1) "name"
+ 2) "NPK Fertilizer"
+ 3) "inventory_item_id"
+ 4) "1201"
+ 5) "nitrogen_percent"
+ 6) "20"
+ 7) "phosphorus_percent"
+ 8) "20"
+ 9) "potassium_percent"
+10) "20"
+127.0.0.1:6379> HSET pesticide:1501 name "Neem-Based Pesticide" inventory_item_id 1201 pesticide_type "Biological" target_pest "Aphids"
+(integer) 4
+127.0.0.1:6379> HGETALL pesticide:1501
+1) "name"
+2) "Neem-Based Pesticide"
+3) "inventory_item_id"
+4) "1201"
+5) "pesticide_type"
+6) "Biological"
+7) "target_pest"
+8) "Aphids"
+127.0.0.1:6379> HSET worker:1601 name "Suresh Kumar" role "Farm Supervisor"salary 18000 farm_id 201
+(integer) 4
+127.0.0.1:6379> HSET worker_phone:1602 worker_id 1601 phone "9876512345"
+(integer) 2
+127.0.0.1:6379> SADD worker:1601:phones 1602
+(integer) 1
+127.0.0.1:6379> SADD farm:201:workers 1601
+(integer) 1
+127.0.0.1:6379> HGETALL worker:1601
+1) "name"
+2) "Suresh Kumar"
+3) "role"
+4) "Farm Supervisor"
+5) "salary"
+6) "18000"
+7) "farm_id"
+8) "201"
+127.0.0.1:6379> HGETALL worker_phone:1602
+1) "worker_id"
+2) "1601"
+3) "phone"
+4) "9876512345"
+127.0.0.1:6379> HSET attendance:1701 worker_id 1601 attendance_date "2026-10-13" status "Present" hours_worked 8
+(integer) 4
+127.0.0.1:6379> SADD worker:1601:attendance 1701
+(integer) 1
+127.0.0.1:6379> HGETALL attendance:1701
+1) "worker_id"
+2) "1601"
+3) "attendance_date"
+4) "2026-10-13"
+5) "status"
+6) "Present"
+7) "hours_worked"
+8) "8"
+127.0.0.1:6379> SMEMBERS worker:1601:attendance
+1) "1701"
+127.0.0.1:6379> HSET equipment:1801 name "Tractor" equipment_type "Agricultural Machinery" purchase_date "2025-06-15" status "Available" farm_id 201
+(integer) 5
+127.0.0.1:6379> SADD farm:201:equipment 1801
+(integer) 1
+127.0.0.1:6379> HSET maintenance:1802 equipment_id 1801 maintenance_date "2026-10-01" maintenance_type "Routine Service" cost 2500 status "Completed"
+(integer) 5
+127.0.0.1:6379> SADD equipment:1801:maintenance 1802
+(integer) 1
+127.0.0.1:6379> HGETALL equipment:1801
+ 1) "name"
+ 2) "Tractor"
+ 3) "equipment_type"
+ 4) "Agricultural Machinery"
+ 5) "purchase_date"
+ 6) "2025-06-15"
+ 7) "status"
+ 8) "Available"
+ 9) "farm_id"
+10) "201"
+127.0.0.1:6379> HGETALL maintenance:1802
+ 1) "equipment_id"
+ 2) "1801"
+ 3) "maintenance_date"
+ 4) "2026-10-01"
+ 5) "maintenance_type"
+ 6) "Routine Service"
+ 7) "cost"
+ 8) "2500"
+ 9) "status"
+10) "Completed"
+127.0.0.1:6379> HSET worker_equipment:1901 worker_id 1601 equipment_id 1801assigned_on "2026-10-13" status "Assigned"
+(integer) 4
+127.0.0.1:6379> SADD worker:1601:equipment_assignments 1901
+(integer) 1
+127.0.0.1:6379> SADD equipment:1801:worker_assignments 1901
+(integer) 1
+127.0.0.1:6379> HGETALL worker_equipment:1901
+1) "worker_id"
+2) "1601"
+3) "equipment_id"
+4) "1801"
+5) "assigned_on"
+6) "2026-10-13"
+7) "status"
+8) "Assigned"
+127.0.0.1:6379> HSET customer:2001 name "Ravi Traders" address "Chennai" email "ravi@example.com"
+(integer) 3
+127.0.0.1:6379> HSET customer_phone:2002 customer_id 2001 phone "9876523456"
+(integer) 2
+127.0.0.1:6379> SADD customer:2001:phones 2002
+(integer) 1
+127.0.0.1:6379> HGETALL customer:2001
+1) "name"
+2) "Ravi Traders"
+3) "address"
+4) "Chennai"
+5) "email"
+6) "ravi@example.com"
+127.0.0.1:6379> HGETALL customer_phone:2002
+1) "customer_id"
+2) "2001"
+3) "phone"
+4) "9876523456"
+127.0.0.1:6379> HSET harvest:2101 crop_season_id 1001 field_id 301 harvest_date "2026-10-13" quantity 2500 unit "kg" quality "Grade A"
+(integer) 6
+127.0.0.1:6379> SADD crop_season:1001:harvests 2101
+(integer) 1
+127.0.0.1:6379> SADD field:301:harvests 2101
+(integer) 1
+127.0.0.1:6379> SADD field:301:harvests 2101
+(integer) 0
+127.0.0.1:6379> HSET sale:2201 harvest_id 2101 customer_id 2001 sale_date "2026-10-13" quantity 500 unit "kg" unit_price 35 total_amount 17500 status "Completed"
+(integer) 8
+127.0.0.1:6379> SADD harvest:2101:sales 2201
+(integer) 1
+127.0.0.1:6379> SADD customer:2001:sales 2201
+(integer) 1
+127.0.0.1:6379> HGETALL sale:2201
+ 1) "harvest_id"
+ 2) "2101"
+ 3) "customer_id"
+ 4) "2001"
+ 5) "sale_date"
+ 6) "2026-10-13"
+ 7) "quantity"
+ 8) "500"
+ 9) "unit"
+10) "kg"
+11) "unit_price"
+12) "35"
+13) "total_amount"
+14) "17500"
+15) "status"
+16) "Completed"
+127.0.0.1:6379> SMEMBERS customer:2001:sales
+1) "2201"
+127.0.0.1:6379> HSET payment:2301 sale_id 2201 payment_date "2026-10-13" amount 17500 payment_method "UPI" payment_status "Paid" transaction_reference "TXN20261013001"
+(integer) 6
+127.0.0.1:6379> SADD sale:2201:payments 2301
+(integer) 1
+127.0.0.1:6379> HGETALL payment:2301
+ 1) "sale_id"
+ 2) "2201"
+ 3) "payment_date"
+ 4) "2026-10-13"
+ 5) "amount"
+ 6) "17500"
+ 7) "payment_method"
+ 8) "UPI"
+ 9) "payment_status"
+10) "Paid"
+11) "transaction_reference"
+12) "TXN20261013001"
+127.0.0.1:6379> SMEMBERS sale:2201:payments
+1) "2301"
+127.0.0.1:6379> HSET customer:2003 name "Green Mart" address "Vellore" email "greenmart@example.com"
+(integer) 3
+127.0.0.1:6379> HGETALL customer:2003
+1) "name"
+2) "Green Mart"
+3) "address"
+4) "Vellore"
+5) "email"
+6) "greenmart@example.com"
+127.0.0.1:6379> HSET customer:2003 address "Vellore, Tamil Nadu"
+(integer) 0
+127.0.0.1:6379> HGET customer:2003 address
+"Vellore, Tamil Nadu"
+127.0.0.1:6379> HGET customer:2003 address
+"Vellore, Tamil Nadu"
+127.0.0.1:6379> HSET customer:2999 name "Temporary Customer" address "Test Location"
+(integer) 2
+127.0.0.1:6379> DEL customer:2999
+(integer) 1
+127.0.0.1:6379> EXISTS customer:2999
+(integer) 0
+127.0.0.1:6379> HGETALL farmer:101
+1) "name"
+2) "Ramesh Kumar"
+3) "address"
+4) "Kanchipuram, Tamil Nadu"
+5) "email"
+6) "ramesh@example.com"
+7) "phone"
+8) "9876543210"
+127.0.0.1:6379> SMEMBERS farmer:101:farms
+1) "201"
+127.0.0.1:6379> HGETALL farm:201
+1) "name"
+2) "Green Valley Farm"
+3) "location"
+4) "Kanchipuram"
+5) "total_area"
+6) "25.5"
+7) "farmer_id"
+8) "101"
+127.0.0.1:6379> SMEMBERS farm:201:fields
+1) "301"
+127.0.0.1:6379> HGETALL soil_test:401
+ 1) "field_id"
+ 2) "301"
+ 3) "ph"
+ 4) "6.5"
+ 5) "nitrogen"
+ 6) "Medium"
+ 7) "phosphorus"
+ 8) "High"
+ 9) "potassium"
+10) "Medium"
+11) "tested_on"
+12) "2026-10-01"
+127.0.0.1:6379> HGETALL crop:701
+1) "name"
+2) "Rice"
+3) "scientific_name"
+4) "Oryza sativa"
+5) "category"
+6) "Cereal"
+7) "duration_days"
+8) "125"
+127.0.0.1:6379> SMEMBERS crop:701:varieties
+1) "801"
+127.0.0.1:6379> SMEMBERS worker:1601:attendance
+1) "1701"
+127.0.0.1:6379> HGETALL attendance:1701
+1) "worker_id"
+2) "1601"
+3) "attendance_date"
+4) "2026-10-13"
+5) "status"
+6) "Present"
+7) "hours_worked"
+8) "8"
+127.0.0.1:6379> SMEMBERS customer:2001:sales
+1) "2201"
+127.0.0.1:6379> HGETALL sale:2201
+ 1) "harvest_id"
+ 2) "2101"
+ 3) "customer_id"
+ 4) "2001"
+ 5) "sale_date"
+ 6) "2026-10-13"
+ 7) "quantity"
+ 8) "500"
+ 9) "unit"
+10) "kg"
+11) "unit_price"
+12) "35"
+13) "total_amount"
+14) "17500"
+15) "status"
+16) "Completed"
+127.0.0.1:6379> SMEMBERS sale:2201:payments
+1) "2301"
+127.0.0.1:6379> HGETALL payment:2301
+ 1) "sale_id"
+ 2) "2201"
+ 3) "payment_date"
+ 4) "2026-10-13"
+ 5) "amount"
+ 6) "17500"
+ 7) "payment_method"
+ 8) "UPI"
+ 9) "payment_status"
+10) "Paid"
+11) "transaction_reference"
+12) "TXN20261013001"
+127.0.0.1:6379> SMEMBERS farm:201:equipment
+1) "1801"
+127.0.0.1:6379> HGETALL equipment:1801
+ 1) "name"
+ 2) "Tractor"
+ 3) "equipment_type"
+ 4) "Agricultural Machinery"
+ 5) "purchase_date"
+ 6) "2025-06-15"
+ 7) "status"
+ 8) "Available"
+ 9) "farm_id"
+10) "201"
+127.0.0.1:6379> EXIT
+
+What's next:
+    Try Docker Debug for seamless, persistent debugging tools in any container or image → docker debug redis
+    Learn more at https://docs.docker.com/go/debug-cli/
+PS C:\Users\aksha> docker exec redis redis-cli SAVE
+OK
+PS C:\Users\aksha>

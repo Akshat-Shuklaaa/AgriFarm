@@ -1,0 +1,222 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Sidebar } from '../components/Sidebar';
+import { Header } from '../components/Header';
+import { DashboardView } from '../components/DashboardView';
+import { EntityCrudView } from '../components/EntityCrudView';
+import { ReportsView } from '../components/ReportsView';
+import { ENTITY_CONFIGS } from '../lib/entities';
+import { api } from '../lib/api';
+import {
+  Database,
+  Server,
+  Key,
+  Shield,
+  Layers,
+  CheckCircle2,
+  AlertCircle,
+  Wheat,
+  RotateCcw,
+} from 'lucide-react';
+
+export default function Home() {
+  const [activeView, setActiveView] = useState('dashboard');
+  const [redisConnected, setRedisConnected] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [healthInfo, setHealthInfo] = useState<any>(null);
+
+  useEffect(() => {
+    checkHealth();
+    const interval = setInterval(checkHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const checkHealth = async () => {
+    try {
+      const res = await api.health();
+      if (res.success) {
+        setRedisConnected(true);
+        setHealthInfo(res.data);
+      } else {
+        setRedisConnected(false);
+      }
+    } catch {
+      setRedisConnected(false);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await checkHealth();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  // Determine current entity config if browsing an entity
+  const currentEntityConfig = ENTITY_CONFIGS[activeView];
+
+  const getPageTitle = () => {
+    if (activeView === 'dashboard') return 'Executive Dashboard';
+    if (activeView === 'reports') return 'System Reports & Analytics';
+    if (activeView === 'settings') return 'System Settings & Architecture';
+    if (currentEntityConfig) return currentEntityConfig.pluralLabel;
+    return activeView;
+  };
+
+  const getCategory = () => {
+    if (activeView === 'dashboard' || activeView === 'reports') return 'Analytics';
+    if (activeView === 'settings') return 'Configuration';
+    if (currentEntityConfig) return currentEntityConfig.category;
+    return 'Entities';
+  };
+
+  return (
+    <div className="flex min-h-screen bg-[#f8faf7]">
+      {/* Persistent Left Sidebar */}
+      <Sidebar
+        activeView={activeView}
+        onSelectView={(view) => setActiveView(view)}
+        redisConnected={redisConnected}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header
+          title={getPageTitle()}
+          category={getCategory()}
+          onRefresh={handleManualRefresh}
+          isRefreshing={isRefreshing}
+        />
+
+        <main className="flex-1 pb-16">
+          {activeView === 'dashboard' && (
+            <DashboardView onNavigate={(view) => setActiveView(view)} />
+          )}
+
+          {activeView === 'reports' && <ReportsView />}
+
+          {activeView === 'settings' && (
+            <div className="p-8 max-w-5xl mx-auto space-y-6">
+              <div className="border-b border-[#e2eae1] pb-4">
+                <h2 className="text-xl font-bold text-[#1c2720]">System Architecture & Settings</h2>
+                <p className="text-xs text-[#5e7063] mt-1">
+                  Agricultural Farm Management System (Oracle SQL DA2 → Redis Hash/Set DA3)
+                </p>
+              </div>
+
+              {/* Architecture Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-[#e2eae1] space-y-3">
+                  <div className="flex items-center gap-2.5 text-[#2d5a3f]">
+                    <Database className="w-5 h-5" />
+                    <h3 className="text-sm font-bold text-[#1c2720]">Redis In-Memory Database</h3>
+                  </div>
+                  <p className="text-xs text-[#5e7063] leading-relaxed">
+                    Entity records are stored as Redis Hashes (e.g.{' '}
+                    <code className="text-[#2d5a3f] bg-[#eef3ed] px-1 py-0.5 rounded font-mono">
+                      farmer:101
+                    </code>
+                    ) and entity relationship foreign keys are maintained through bidirectional Redis Sets (e.g.{' '}
+                    <code className="text-[#2d5a3f] bg-[#eef3ed] px-1 py-0.5 rounded font-mono">
+                      farmer:101:farms
+                    </code>
+                    ).
+                  </p>
+                  <div className="pt-2 border-t border-[#f0f4f0] flex items-center justify-between text-xs">
+                    <span className="text-[#5e7063]">Connection URL:</span>
+                    <span className="font-mono text-[#2d5a3f]">redis://localhost:6379</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#5e7063]">Container Name:</span>
+                    <span className="font-mono text-[#1c2720]">redis:latest (port 6379)</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-[#e2eae1] space-y-3">
+                  <div className="flex items-center gap-2.5 text-[#2d5a3f]">
+                    <Server className="w-5 h-5" />
+                    <h3 className="text-sm font-bold text-[#1c2720]">Express REST Backend API</h3>
+                  </div>
+                  <p className="text-xs text-[#5e7063] leading-relaxed">
+                    Modular TypeScript API with centralized Zod validation, rate limiting, and atomic pipeline
+                    transactions ensuring referential integrity and zero orphan records.
+                  </p>
+                  <div className="pt-2 border-t border-[#f0f4f0] flex items-center justify-between text-xs">
+                    <span className="text-[#5e7063]">Backend Base URL:</span>
+                    <span className="font-mono text-[#2d5a3f]">http://localhost:4000/api</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#5e7063]">Server Status:</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Healthy
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Model Reference */}
+              <div className="bg-white p-6 rounded-2xl border border-[#e2eae1] space-y-4">
+                <h3 className="text-sm font-bold text-[#1c2720]">
+                  Oracle SQL DA2 vs. Redis DA3 Schema Mapping
+                </h3>
+                <div className="overflow-x-auto text-xs">
+                  <table className="w-full text-left">
+                    <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063]">
+                      <tr>
+                        <th className="py-2.5 px-3">Entity Type</th>
+                        <th className="py-2.5 px-3">Oracle DA2 Table</th>
+                        <th className="py-2.5 px-3">Redis Key Pattern</th>
+                        <th className="py-2.5 px-3">Relationship Sets</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f0f4f0] font-mono text-[11px]">
+                      <tr>
+                        <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Farmer</td>
+                        <td className="py-2 px-3">FARMER</td>
+                        <td className="py-2 px-3 text-[#2d5a3f]">farmer:&lt;id&gt;</td>
+                        <td className="py-2 px-3">farmer:&lt;id&gt;:farms, farmer:&lt;id&gt;:phones</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Farm</td>
+                        <td className="py-2 px-3">FARM</td>
+                        <td className="py-2 px-3 text-[#2d5a3f]">farm:&lt;id&gt;</td>
+                        <td className="py-2 px-3">farm:&lt;id&gt;:fields, farm:&lt;id&gt;:workers</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Field</td>
+                        <td className="py-2 px-3">FIELD</td>
+                        <td className="py-2 px-3 text-[#2d5a3f]">field:&lt;id&gt;</td>
+                        <td className="py-2 px-3">field:&lt;id&gt;:soil_tests, field:&lt;id&gt;:harvests</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Crop & Variety</td>
+                        <td className="py-2 px-3">CROP, CROP_VARIETY</td>
+                        <td className="py-2 px-3 text-[#2d5a3f]">crop:&lt;id&gt;, crop_variety:&lt;id&gt;</td>
+                        <td className="py-2 px-3">crop:&lt;id&gt;:varieties, crop:&lt;id&gt;:seasons</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Harvest & Sale</td>
+                        <td className="py-2 px-3">HARVEST, SALE</td>
+                        <td className="py-2 px-3 text-[#2d5a3f]">harvest:&lt;id&gt;, sale:&lt;id&gt;</td>
+                        <td className="py-2 px-3">harvest:&lt;id&gt;:sales, sale:&lt;id&gt;:payments</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Any of the 28 Entity CRUD Views */}
+          {currentEntityConfig && (
+            <EntityCrudView
+              key={currentEntityConfig.key}
+              config={currentEntityConfig}
+              onNavigateToEntity={(entityKey) => setActiveView(entityKey)}
+            />
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
