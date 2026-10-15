@@ -24,7 +24,7 @@ if (!parsed.success) {
 }
 
 const rawCors = parsed.data.CORS_ORIGINS || parsed.data.CORS_ORIGIN || 'http://localhost:3000';
-const corsOrigins = rawCors.split(',').map((o) => o.trim()).filter(Boolean);
+const corsOrigins = rawCors.split(',').map((o) => o.trim().replace(/\/+$/, '')).filter(Boolean);
 
 export const config = {
   port: parsed.data.PORT,

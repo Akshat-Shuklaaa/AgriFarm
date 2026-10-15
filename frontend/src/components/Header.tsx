@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { RefreshCw, Search, Bell, Check, Clock, ShieldCheck, X } from 'lucide-react';
+import { RefreshCw, Search, Bell, Check, Clock, ShieldCheck, X, Menu } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
   category?: string;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  onOpenMobileNav?: () => void;
 }
 
 interface NotificationItem {
@@ -19,7 +20,13 @@ interface NotificationItem {
   type: 'success' | 'info' | 'warning';
 }
 
-export function Header({ title, category = 'System', onRefresh, isRefreshing }: HeaderProps) {
+export function Header({
+  title,
+  category = 'System',
+  onRefresh,
+  isRefreshing,
+  onOpenMobileNav,
+}: HeaderProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
@@ -80,28 +87,41 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
   };
 
   return (
-    <header className="h-16 bg-white border-b border-[#e2eae1] px-8 flex items-center justify-between sticky top-0 z-20">
-      {/* Title & Breadcrumbs */}
-      <div>
-        <div className="flex items-center gap-2 text-[11px] text-[#5e7063]">
-          <span>Agricultural SaaS</span>
-          <span>/</span>
-          <span className="capitalize">{category}</span>
-          <span>/</span>
-          <span className="text-[#2d5a3f] font-medium">{title}</span>
+    <header className="h-16 bg-white border-b border-[#e2eae1] px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-20">
+      {/* Left Area: Mobile Menu Button + Title & Breadcrumbs */}
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2">
+        {onOpenMobileNav && (
+          <button
+            onClick={onOpenMobileNav}
+            className="lg:hidden p-2 -ml-1 rounded-lg text-[#5e7063] hover:text-[#1c2720] hover:bg-[#f0f4f0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2d5a3f] shrink-0"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-[#5e7063] truncate">
+            <span>AgriFarm</span>
+            <span>/</span>
+            <span className="capitalize truncate">{category}</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="text-[#2d5a3f] font-medium hidden sm:inline truncate">{title}</span>
+          </div>
+          <h2 className="text-base sm:text-lg font-semibold text-[#1c2720] tracking-tight truncate">
+            {title}
+          </h2>
         </div>
-        <h2 className="text-lg font-semibold text-[#1c2720] tracking-tight">{title}</h2>
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
-        {/* Search Input Placeholder */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Search Input Placeholder (hidden on mobile, visible on tablet/desktop) */}
         <div className="relative hidden md:block">
           <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search records or IDs..."
-            className="pl-8 pr-3 py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] w-56 text-[#1c2720] placeholder-[#87986a]"
+            className="pl-8 pr-3 py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] w-40 lg:w-56 text-[#1c2720] placeholder-[#87986a]"
           />
         </div>
 
@@ -110,11 +130,11 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e2eae1] bg-white text-xs font-medium text-[#2d5a3f] hover:bg-[#f0f4f0] transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#e2eae1] bg-white text-xs font-medium text-[#2d5a3f] hover:bg-[#f0f4f0] transition-colors disabled:opacity-50"
             title="Refresh current data from Redis"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Sync</span>
+            <span className="hidden sm:inline">Sync</span>
           </button>
         )}
 
@@ -128,6 +148,7 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
                 : 'text-[#5e7063] hover:text-[#1c2720] hover:bg-[#f0f4f0]'
             }`}
             title="Notifications"
+            aria-label="View notifications"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
@@ -137,8 +158,8 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
 
           {/* Dropdown Card */}
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-[#e2eae1] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="p-4 border-b border-[#e2eae1] flex items-center justify-between bg-[#fafcfa]">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 bg-white rounded-2xl shadow-xl border border-[#e2eae1] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="p-3.5 sm:p-4 border-b border-[#e2eae1] flex items-center justify-between bg-[#fafcfa]">
                 <div className="flex items-center gap-2">
                   <h3 className="text-xs font-bold text-[#1c2720]">Notifications</h3>
                   {unreadCount > 0 && (
@@ -160,14 +181,14 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
               {/* Notification List */}
               <div className="max-h-80 overflow-y-auto divide-y divide-[#f0f4f0]">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-[#5e7063]">
+                  <div className="p-6 text-center text-xs text-[#5e7063]">
                     No notifications at this time
                   </div>
                 ) : (
                   notifications.map((item) => (
                     <div
                       key={item.id}
-                      className={`p-3.5 flex items-start gap-3 transition-colors hover:bg-[#fafcfa] ${
+                      className={`p-3 sm:p-3.5 flex items-start gap-2.5 sm:gap-3 transition-colors hover:bg-[#fafcfa] ${
                         item.unread ? 'bg-[#f4f7f3]/50' : 'bg-white'
                       }`}
                     >
@@ -181,11 +202,11 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
                         <ShieldCheck className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-1">
                           <h4 className="text-xs font-semibold text-[#1c2720] truncate">
                             {item.title}
                           </h4>
-                          <span className="text-[10px] text-[#5e7063] shrink-0 ml-2">
+                          <span className="text-[10px] text-[#5e7063] shrink-0">
                             {item.time}
                           </span>
                         </div>
@@ -195,8 +216,9 @@ export function Header({ title, category = 'System', onRefresh, isRefreshing }: 
                       </div>
                       <button
                         onClick={() => removeNotification(item.id)}
-                        className="text-[#87986a] hover:text-rose-600 p-0.5 transition"
+                        className="text-[#87986a] hover:text-rose-600 p-1 transition shrink-0"
                         title="Dismiss"
+                        aria-label="Dismiss notification"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>

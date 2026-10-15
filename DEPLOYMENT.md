@@ -22,11 +22,18 @@ This guide details the exact production deployment steps for the **Agricultural 
      ```
      redis://default:YOUR_PASSWORD@redis-12345.c123.ap-south-1-1.ec2.redislabs.com:12345
      ```
-5. **Initial Seeding for Production:**
-   - Run the safe idempotent seed script pointing to your Redis Cloud URL to establish schema indexes without demo test records:
+5. **Initial Seeding / Verification for Production:**
+   - Test the connection safely without writing any data using dry-run mode:
      ```bash
+     # From root or backend directory:
+     REDIS_URL="redis://default:YOUR_PASSWORD@..." npm run seed:dry-run
+     ```
+   - Run the safe idempotent seed script pointing to your Redis Cloud URL to establish schema indexes:
+     ```bash
+     # From root or backend directory:
      REDIS_URL="redis://default:YOUR_PASSWORD@..." npm run seed
      ```
+     *(Note: Existing keys are safely preserved and never deleted or overwritten by default).*
 
 ---
 

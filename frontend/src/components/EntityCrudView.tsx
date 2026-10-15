@@ -191,30 +191,30 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
   const totalPages = Math.ceil(total / limit) || 1;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 min-w-0 w-full">
       {/* Entity Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e2eae1]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-[#e2eae1]">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-[#1c2720] tracking-tight">{config.pluralLabel}</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#1c2720] tracking-tight">{config.pluralLabel}</h2>
             <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-[#eef3ed] text-[#2d5a3f]">
               {total} {total === 1 ? 'Record' : 'Records'}
             </span>
           </div>
-          <p className="text-xs text-[#5e7063] mt-1">{config.description}</p>
+          <p className="text-xs sm:text-sm text-[#5e7063] mt-1 break-words">{config.description}</p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition shadow-sm shadow-[#2d5a3f]/20 shrink-0"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition shadow-sm shadow-[#2d5a3f]/20 w-full sm:w-auto shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 shrink-0" />
           <span>Add {config.label}</span>
         </button>
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-[#e2eae1]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-xl border border-[#e2eae1]">
         <div className="relative w-full sm:w-80">
           <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -225,11 +225,11 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
               setPage(1);
             }}
             placeholder={`Search ${config.pluralLabel.toLowerCase()}...`}
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] text-[#1c2720]"
+            className="w-full pl-8 pr-3 py-2 sm:py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] text-[#1c2720]"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end text-xs text-[#5e7063]">
+        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs text-[#5e7063]">
           <span>
             Showing {items.length} of {total}
           </span>
@@ -257,23 +257,23 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[620px] text-left text-xs">
               <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063] font-semibold select-none">
                 <tr>
                   {config.columns.map((col) => (
-                    <th key={col.key} className="py-3 px-4">
+                    <th key={col.key} className="py-3 px-3 sm:px-4">
                       {col.label}
                     </th>
                   ))}
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-3 sm:px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0f4f0] text-[#1c2720]">
                 {items.map((item, rowIdx) => (
                   <tr key={item.id || rowIdx} className="hover:bg-[#fafcfa] transition-colors">
                     {config.columns.map((col) => (
-                      <td key={col.key} className="py-3 px-4">
+                      <td key={col.key} className="py-3 px-3 sm:px-4">
                         {col.key === 'id' ? (
                           <span className="font-mono font-medium text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded text-[11px]">
                             #{item[col.key]}
@@ -285,24 +285,24 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                         )}
                       </td>
                     ))}
-                    <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                    <td className="py-3 px-3 sm:px-4 text-right space-x-1 whitespace-nowrap">
                       <button
                         onClick={() => handleOpenDetail(item)}
-                        className="p-1.5 rounded-lg text-[#5e7063] hover:text-[#2d5a3f] hover:bg-[#eef3ed] transition"
+                        className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-[#2d5a3f] hover:bg-[#eef3ed] transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
                         title="View Details"
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleOpenEdit(item)}
-                        className="p-1.5 rounded-lg text-[#5e7063] hover:text-[#2d5a3f] hover:bg-[#eef3ed] transition"
+                        className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-[#2d5a3f] hover:bg-[#eef3ed] transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
                         title="Edit Record"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleOpenDelete(item)}
-                        className="p-1.5 rounded-lg text-[#5e7063] hover:text-rose-600 hover:bg-rose-50 transition"
+                        className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-rose-600 hover:bg-rose-50 transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
                         title="Delete Record"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -317,7 +317,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
 
         {/* Pagination Footer */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-[#e2eae1] flex items-center justify-between text-xs text-[#5e7063]">
+          <div className="p-3 sm:p-4 border-t border-[#e2eae1] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5e7063]">
             <span>
               Page {page} of {totalPages}
             </span>
@@ -325,14 +325,14 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="p-1.5 rounded-lg border border-[#e2eae1] hover:bg-[#f0f4f0] disabled:opacity-40 transition"
+                className="p-2 rounded-lg border border-[#e2eae1] hover:bg-[#f0f4f0] disabled:opacity-40 transition flex items-center justify-center min-w-[36px] min-h-[36px]"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="p-1.5 rounded-lg border border-[#e2eae1] hover:bg-[#f0f4f0] disabled:opacity-40 transition"
+                className="p-2 rounded-lg border border-[#e2eae1] hover:bg-[#f0f4f0] disabled:opacity-40 transition flex items-center justify-center min-w-[36px] min-h-[36px]"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -343,10 +343,10 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
 
       {/* CREATE / EDIT MODAL */}
       {(isCreateOpen || isEditOpen) && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-[#e2eae1] space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-xl border border-[#e2eae1] space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-[#e2eae1]">
-              <h3 className="text-sm font-bold text-[#1c2720]">
+              <h3 className="text-sm font-bold text-[#1c2720] truncate pr-2">
                 {isEditOpen ? `Edit ${config.label} #${activeItem?.id}` : `Register New ${config.label}`}
               </h3>
               <button
@@ -354,7 +354,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                   setIsCreateOpen(false);
                   setIsEditOpen(false);
                 }}
-                className="p-1 rounded-lg text-[#5e7063] hover:bg-[#f0f4f0]"
+                className="p-1.5 rounded-lg text-[#5e7063] hover:bg-[#f0f4f0] shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -413,14 +413,14 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
               })}
             </div>
 
-            <div className="pt-3 border-t border-[#e2eae1] flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-[#e2eae1] flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 w-full">
               <button
                 type="button"
                 onClick={() => {
                   setIsCreateOpen(false);
                   setIsEditOpen(false);
                 }}
-                className="px-4 py-2 border border-[#e2eae1] rounded-xl text-xs font-medium text-[#5e7063] hover:bg-[#f0f4f0]"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-[#e2eae1] rounded-xl text-xs font-medium text-[#5e7063] hover:bg-[#f0f4f0] transition text-center"
               >
                 Cancel
               </button>
@@ -428,7 +428,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => handleSave(isEditOpen)}
-                className="px-4 py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition disabled:opacity-50 text-center"
               >
                 {isSubmitting ? 'Saving to Redis...' : isEditOpen ? 'Update Record' : 'Save Record'}
               </button>
@@ -439,27 +439,27 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
 
       {/* DETAIL MODAL */}
       {isDetailOpen && activeItem && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-[#e2eae1] space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-xl border border-[#e2eae1] space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-[#e2eae1]">
-              <div>
-                <span className="text-[10px] font-mono font-medium text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded">
+              <div className="min-w-0 pr-2">
+                <span className="inline-block text-[10px] font-mono font-medium text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded truncate max-w-full">
                   REDIS HASH: {config.key.slice(0, -1)}:{activeItem.id}
                 </span>
-                <h3 className="text-base font-bold text-[#1c2720] mt-1">
+                <h3 className="text-base font-bold text-[#1c2720] mt-1 truncate">
                   {config.label} #{activeItem.id}
                 </h3>
               </div>
-              <button onClick={() => setIsDetailOpen(false)} className="p-1 rounded-lg text-[#5e7063] hover:bg-[#f0f4f0]">
+              <button onClick={() => setIsDetailOpen(false)} className="p-1.5 rounded-lg text-[#5e7063] hover:bg-[#f0f4f0] shrink-0">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="divide-y divide-[#f0f4f0] text-xs">
               {Object.entries(activeItem).map(([k, v]) => (
-                <div key={k} className="py-2.5 flex justify-between gap-4">
-                  <span className="font-medium text-[#5e7063] capitalize">{k.replace(/_/g, ' ')}</span>
-                  <span className="text-[#1c2720] font-mono text-right truncate max-w-xs">{String(v ?? '—')}</span>
+                <div key={k} className="py-2.5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-4">
+                  <span className="font-medium text-[#5e7063] capitalize shrink-0">{k.replace(/_/g, ' ')}</span>
+                  <span className="text-[#1c2720] font-mono text-left sm:text-right break-words">{String(v ?? '—')}</span>
                 </div>
               ))}
             </div>
@@ -467,7 +467,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
             <div className="pt-3 border-t border-[#e2eae1] flex justify-end">
               <button
                 onClick={() => setIsDetailOpen(false)}
-                className="px-4 py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731]"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition text-center"
               >
                 Close
               </button>
@@ -478,15 +478,15 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
 
       {/* DELETE CONFIRMATION MODAL */}
       {isDeleteOpen && activeItem && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-[#e2eae1] space-y-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-xl border border-[#e2eae1] space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-start gap-3">
               <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 shrink-0">
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-[#1c2720]">Delete {config.label} Record?</h3>
-                <p className="text-xs text-[#5e7063] mt-1">
+                <p className="text-xs text-[#5e7063] mt-1 break-words">
                   Are you sure you want to delete <span className="font-semibold text-[#1c2720]">#{activeItem.id}</span>?
                   This will remove the Redis hash key and clean up index sets.
                 </p>
@@ -496,18 +496,18 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
             {deleteError && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <div>
+                <div className="break-words">
                   <p className="font-semibold">Referential Integrity Protection:</p>
                   <p className="mt-0.5">{deleteError}</p>
                 </div>
               </div>
             )}
 
-            <div className="pt-2 flex items-center justify-end gap-2">
+            <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 w-full">
               <button
                 type="button"
                 onClick={() => setIsDeleteOpen(false)}
-                className="px-4 py-2 border border-[#e2eae1] rounded-xl text-xs font-medium text-[#5e7063] hover:bg-[#f0f4f0]"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-[#e2eae1] rounded-xl text-xs font-medium text-[#5e7063] hover:bg-[#f0f4f0] transition text-center"
               >
                 Cancel
               </button>
@@ -515,7 +515,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleDelete}
-                className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 transition disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 transition disabled:opacity-50 text-center"
               >
                 {isSubmitting ? 'Deleting...' : 'Confirm Delete'}
               </button>

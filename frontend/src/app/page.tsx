@@ -25,6 +25,7 @@ export default function Home() {
   const [redisConnected, setRedisConnected] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [healthInfo, setHealthInfo] = useState<any>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     checkHealth();
@@ -71,24 +72,30 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f8faf7]">
-      {/* Persistent Left Sidebar */}
+    <div className="flex min-h-screen bg-[#f8faf7] w-full overflow-x-hidden">
+      {/* Sidebar: persistent on desktop (lg+), responsive slide-out drawer on mobile/tablet */}
       <Sidebar
         activeView={activeView}
-        onSelectView={(view) => setActiveView(view)}
+        onSelectView={(view) => {
+          setActiveView(view);
+          setMobileNavOpen(false);
+        }}
         redisConnected={redisConnected}
+        mobileOpen={mobileNavOpen}
+        onCloseMobile={() => setMobileNavOpen(false)}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
         <Header
           title={getPageTitle()}
           category={getCategory()}
           onRefresh={handleManualRefresh}
           isRefreshing={isRefreshing}
+          onOpenMobileNav={() => setMobileNavOpen(true)}
         />
 
-        <main className="flex-1 pb-16">
+        <main className="flex-1 pb-16 min-w-0 w-full">
           {activeView === 'dashboard' && (
             <DashboardView onNavigate={(view) => setActiveView(view)} />
           )}
@@ -96,9 +103,9 @@ export default function Home() {
           {activeView === 'reports' && <ReportsView />}
 
           {activeView === 'settings' && (
-            <div className="p-8 max-w-5xl mx-auto space-y-6">
-              <div className="border-b border-[#e2eae1] pb-4">
-                <h2 className="text-xl font-bold text-[#1c2720]">System Architecture & Settings</h2>
+            <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-4 sm:space-y-6 min-w-0 w-full">
+              <div className="border-b border-[#e2eae1] pb-3 sm:pb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-[#1c2720]">System Architecture & Settings</h2>
                 <p className="text-xs text-[#5e7063] mt-1">
                   Agricultural Farm Management System (Oracle SQL DA2 → Redis Hash/Set DA3)
                 </p>
@@ -106,44 +113,44 @@ export default function Home() {
 
               {/* Architecture Overview Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-[#e2eae1] space-y-3">
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#e2eae1] space-y-3">
                   <div className="flex items-center gap-2.5 text-[#2d5a3f]">
-                    <Database className="w-5 h-5" />
+                    <Database className="w-5 h-5 shrink-0" />
                     <h3 className="text-sm font-bold text-[#1c2720]">Redis In-Memory Database</h3>
                   </div>
                   <p className="text-xs text-[#5e7063] leading-relaxed">
                     Entity records are stored as Redis Hashes (e.g.{' '}
-                    <code className="text-[#2d5a3f] bg-[#eef3ed] px-1 py-0.5 rounded font-mono">
+                    <code className="text-[#2d5a3f] bg-[#eef3ed] px-1 py-0.5 rounded font-mono break-all">
                       farmer:101
                     </code>
                     ) and entity relationship foreign keys are maintained through bidirectional Redis Sets (e.g.{' '}
-                    <code className="text-[#2d5a3f] bg-[#eef3ed] px-1 py-0.5 rounded font-mono">
+                    <code className="text-[#2d5a3f] bg-[#eef3ed] px-1 py-0.5 rounded font-mono break-all">
                       farmer:101:farms
                     </code>
                     ).
                   </p>
-                  <div className="pt-2 border-t border-[#f0f4f0] flex items-center justify-between text-xs">
+                  <div className="pt-2 border-t border-[#f0f4f0] flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
                     <span className="text-[#5e7063]">Connection URL:</span>
-                    <span className="font-mono text-[#2d5a3f]">redis://localhost:6379</span>
+                    <span className="font-mono text-[#2d5a3f] break-all">redis://localhost:6379</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
                     <span className="text-[#5e7063]">Container Name:</span>
                     <span className="font-mono text-[#1c2720]">redis:latest (port 6379)</span>
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-[#e2eae1] space-y-3">
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#e2eae1] space-y-3">
                   <div className="flex items-center gap-2.5 text-[#2d5a3f]">
-                    <Server className="w-5 h-5" />
+                    <Server className="w-5 h-5 shrink-0" />
                     <h3 className="text-sm font-bold text-[#1c2720]">Express REST Backend API</h3>
                   </div>
                   <p className="text-xs text-[#5e7063] leading-relaxed">
                     Modular TypeScript API with centralized Zod validation, rate limiting, and atomic pipeline
                     transactions ensuring referential integrity and zero orphan records.
                   </p>
-                  <div className="pt-2 border-t border-[#f0f4f0] flex items-center justify-between text-xs">
+                  <div className="pt-2 border-t border-[#f0f4f0] flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
                     <span className="text-[#5e7063]">Backend Base URL:</span>
-                    <span className="font-mono text-[#2d5a3f]">http://localhost:4000/api</span>
+                    <span className="font-mono text-[#2d5a3f] break-all">http://localhost:4000/api</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[#5e7063]">Server Status:</span>
@@ -155,12 +162,12 @@ export default function Home() {
               </div>
 
               {/* Data Model Reference */}
-              <div className="bg-white p-6 rounded-2xl border border-[#e2eae1] space-y-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#e2eae1] space-y-4">
                 <h3 className="text-sm font-bold text-[#1c2720]">
                   Oracle SQL DA2 vs. Redis DA3 Schema Mapping
                 </h3>
-                <div className="overflow-x-auto text-xs">
-                  <table className="w-full text-left">
+                <div className="overflow-x-auto text-xs w-full -mx-4 sm:mx-0 px-4 sm:px-0">
+                  <table className="w-full text-left min-w-[500px]">
                     <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063]">
                       <tr>
                         <th className="py-2.5 px-3">Entity Type</th>

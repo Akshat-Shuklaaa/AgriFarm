@@ -42,7 +42,17 @@ const app = express();
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: config.corsOrigins,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (config.corsOrigins.includes('*') || config.corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    const isVercelAllowed = config.corsOrigins.some((o) => o.includes('vercel.app')) && origin.endsWith('.vercel.app');
+    if (isVercelAllowed) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -73,7 +83,9 @@ app.use(cookieParser());
 // Logging
 app.use(morgan('combined'));
 
-// API Routes
+// API Routes & Health Checks
+app.get('/', (req, res) => res.json({ success: true, service: 'Agricultural Farm Management API', health: '/api/health' }));
+app.use('/health', healthRouter);
 app.use('/api/health', healthRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/auth', authLimiter, authRouter);
