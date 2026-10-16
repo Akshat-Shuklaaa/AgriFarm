@@ -93,35 +93,51 @@ Content-Type: `application/json`
 
 ## Authentication Endpoints
 
-### 1. User Registration
-- **Endpoint:** `POST /auth/register`
+### 1. User Login
+- **Endpoint:** `POST /api/auth/login`
 - **Body:**
 ```json
 {
-  "username": "ramesh_farmer",
-  "password": "SecurePassword123!",
-  "role": "farmer",
-  "email": "ramesh@example.com"
+  "email": "admin@agrifarm.local",
+  "password": "AdminPassword123!"
 }
 ```
+- **Returns:** User profile, CSRF token, and HttpOnly session cookie (`token`).
+- **Protection:** Brute-force lockout (5 failed attempts locks account for 15 minutes).
 
-### 2. User Login
-- **Endpoint:** `POST /auth/login`
-- **Body:**
-```json
-{
-  "username": "ramesh_farmer",
-  "password": "SecurePassword123!"
-}
-```
-- **Returns:** JWT authentication token set in httpOnly cookie and JSON response.
+### 2. Current User Profile & CSRF Token
+- **Endpoint:** `GET /api/auth/me`
+- **Headers:** `Cookie: token=<jwt>` or `Authorization: Bearer <jwt>`
+- **Returns:** Current authenticated user object and CSRF token.
 
-### 3. Current User Profile
-- **Endpoint:** `GET /auth/me`
-- **Headers:** `Authorization: Bearer <token>` or `Cookie: token=<token>`
+### 3. CSRF Token Retrieval
+- **Endpoint:** `GET /api/auth/csrf-token`
+- **Returns:** New or active CSRF token for state-changing operations.
 
 ### 4. Logout
-- **Endpoint:** `POST /auth/logout`
+- **Endpoint:** `POST /api/auth/logout`
+- **Behavior:** Destroys active session in Redis, clears cookie, and records audit trail.
+
+---
+
+## User Management Endpoints (Admin Only)
+
+| Endpoint | Method | Description |
+|:---|:---|:---|
+| `/api/users` | `GET` | List users with pagination, role filter, status filter, and search |
+| `/api/users` | `POST` | Create a new user with assigned role (worker by default) |
+| `/api/users/:id` | `GET` | Retrieve specific user by ID |
+| `/api/users/:id/role` | `PATCH` | Update user role (`admin`, `farm_manager`, `inventory_manager`, `worker`). Protected: cannot demote last admin |
+| `/api/users/:id/status` | `PATCH` | Update account status (`active` / `inactive`). Immediately revokes all active sessions if inactive |
+| `/api/users/:id` | `DELETE` | Permanently remove user. Protected: cannot delete only remaining admin |
+
+---
+
+## Audit Logs (Admin Only)
+
+- **Endpoint:** `GET /api/audit-logs`
+- **Query Parameters:** `?page=1&limit=20&action=USER_LOGIN&entityType=farm`
+- **Description:** Returns paginated, immutable security and operational audit records stored in Redis.
 
 ---
 

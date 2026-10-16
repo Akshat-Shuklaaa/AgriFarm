@@ -1,7 +1,7 @@
 import { redis } from '../config/redis';
 
-export async function getNextId(entityName: string): Promise<string> {
-  const counterKey = `counter:${entityName}`;
+export async function getNextId(entityName: string, customCounterKey?: string): Promise<string> {
+  const counterKey = customCounterKey || `counter:${entityName}`;
   const nextVal = await redis.incr(counterKey);
   return nextVal.toString();
 }

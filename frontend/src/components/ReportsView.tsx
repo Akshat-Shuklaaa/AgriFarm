@@ -16,22 +16,35 @@ import {
   CheckCircle,
 } from 'lucide-react';
 
+import { useAuth } from '../lib/authContext';
+
 export function ReportsView() {
-  const [selectedReport, setSelectedReport] = useState('farmers-farms');
+  const { canPerform } = useAuth();
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
 
-  const reportTabs = [
-    { id: 'farmers-farms', label: 'Farmers & Farms', icon: Users },
-    { id: 'farms-fields', label: 'Farms & Fields', icon: Building2 },
-    { id: 'crops-varieties', label: 'Crops & Varieties', icon: Wheat },
-    { id: 'low-stock', label: 'Low Stock Alerts', icon: Package },
-    { id: 'equipment-maintenance', label: 'Equipment Upkeep', icon: Wrench },
-    { id: 'sales-payments', label: 'Sales & Settlements', icon: Receipt },
+  const allTabs = [
+    { id: 'farmers-farms', label: 'Farmers & Farms', icon: Users, show: canPerform('farmers', 'read') && canPerform('farms', 'read') },
+    { id: 'farms-fields', label: 'Farms & Fields', icon: Building2, show: canPerform('farms', 'read') && canPerform('fields', 'read') },
+    { id: 'crops-varieties', label: 'Crops & Varieties', icon: Wheat, show: canPerform('crops', 'read') && canPerform('cropVarieties', 'read') },
+    { id: 'low-stock', label: 'Low Stock Alerts', icon: Package, show: canPerform('inventory', 'read') },
+    { id: 'equipment-maintenance', label: 'Equipment Upkeep', icon: Wrench, show: canPerform('equipment', 'read') && canPerform('maintenance', 'read') },
+    { id: 'sales-payments', label: 'Sales & Settlements', icon: Receipt, show: canPerform('sales', 'read') && canPerform('payments', 'read') },
   ];
 
+  const reportTabs = allTabs.filter((t) => t.show);
+  const [selectedReport, setSelectedReport] = useState(() => reportTabs[0]?.id || 'low-stock');
+
   useEffect(() => {
-    loadReport(selectedReport);
+    if (reportTabs.length > 0 && !reportTabs.some((t) => t.id === selectedReport)) {
+      setSelectedReport(reportTabs[0].id);
+    }
+  }, [reportTabs, selectedReport]);
+
+  useEffect(() => {
+    if (selectedReport) {
+      loadReport(selectedReport);
+    }
   }, [selectedReport]);
 
   const loadReport = async (reportId: string) => {

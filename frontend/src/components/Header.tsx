@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { RefreshCw, Search, Bell, Check, Clock, ShieldCheck, X, Menu } from 'lucide-react';
+import { RefreshCw, Search, Bell, Check, Clock, ShieldCheck, X, Menu, LogOut, User as UserIcon } from 'lucide-react';
+import { useAuth, ROLE_LABELS } from '../lib/authContext';
 
 interface HeaderProps {
   title: string;
@@ -63,13 +64,19 @@ export function Header({
     },
   ]);
 
+  const { user, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setNotificationsOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -235,6 +242,61 @@ export function Header({
             </div>
           )}
         </div>
+
+        {/* User Profile Dropdown */}
+        {user && (
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-[#e2eae1] hover:bg-[#f0f4f0] transition-colors cursor-pointer"
+              aria-label="User profile options"
+            >
+              <div className="w-7 h-7 rounded-lg bg-[#2d5a3f] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                {user.name
+                  ? user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join('')
+                      .toUpperCase()
+                  : 'U'}
+              </div>
+              <div className="text-left hidden sm:block">
+                <span className="text-xs font-semibold text-[#1c2720] block leading-tight truncate max-w-[120px]">
+                  {user.name}
+                </span>
+                <span className="text-[10px] text-[#5e7063] block leading-none">
+                  {ROLE_LABELS[user.role] || user.role}
+                </span>
+              </div>
+            </button>
+
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#e2eae1] p-3 space-y-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="p-2 bg-[#f8faf7] rounded-xl border border-[#e2eae1] space-y-1">
+                  <p className="text-xs font-bold text-[#1c2720] truncate">{user.name}</p>
+                  <p className="text-[11px] font-mono text-[#5e7063] truncate">{user.email}</p>
+                  <div className="pt-1 flex items-center justify-between">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#d8e5d6] text-[#21432f]">
+                      {ROLE_LABELS[user.role] || user.role}
+                    </span>
+                    <span className="text-[10px] text-emerald-700 font-medium capitalize">
+                      ● {user.status}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

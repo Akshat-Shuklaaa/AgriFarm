@@ -9,17 +9,25 @@ export const paginationQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 });
 
-// Auth Schemas
-export const authRegisterSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-  role: z.enum(['admin', 'farmer', 'manager', 'worker']).default('farmer'),
-  email: z.string().email().optional(),
+// Auth & User Management Schemas
+export const authLoginSchema = z.object({
+  email: z.string().email('Valid email address is required'),
+  password: z.string().min(1, 'Password is required'),
 });
 
-export const authLoginSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
+export const createUserSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Valid email address is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  role: z.enum(['admin', 'farm_manager', 'inventory_manager', 'worker']).default('worker'),
+});
+
+export const updateUserRoleSchema = z.object({
+  role: z.enum(['admin', 'farm_manager', 'inventory_manager', 'worker']),
+});
+
+export const updateUserStatusSchema = z.object({
+  status: z.enum(['active', 'inactive']),
 });
 
 // 1. Farmer Schema

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { EntityConfig, FieldDefinition } from '../lib/entities';
 import { api } from '../lib/api';
+import { useAuth } from '../lib/authContext';
 import {
   Plus,
   Search,
@@ -25,6 +26,11 @@ interface EntityCrudViewProps {
 }
 
 export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewProps) {
+  const { canPerform } = useAuth();
+  const canCreate = canPerform(config.key, 'create');
+  const canUpdate = canPerform(config.key, 'update');
+  const canDelete = canPerform(config.key, 'delete');
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,13 +210,15 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
           <p className="text-xs sm:text-sm text-[#5e7063] mt-1 break-words">{config.description}</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition shadow-sm shadow-[#2d5a3f]/20 w-full sm:w-auto shrink-0"
-        >
-          <Plus className="w-4 h-4 shrink-0" />
-          <span>Add {config.label}</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-[#2d5a3f] text-white rounded-xl text-xs font-semibold hover:bg-[#234731] transition shadow-sm shadow-[#2d5a3f]/20 w-full sm:w-auto shrink-0"
+          >
+            <Plus className="w-4 h-4 shrink-0" />
+            <span>Add {config.label}</span>
+          </button>
+        )}
       </div>
 
       {/* Search and Filters Bar */}
@@ -293,20 +301,24 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </button>
-                      <button
-                        onClick={() => handleOpenEdit(item)}
-                        className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-[#2d5a3f] hover:bg-[#eef3ed] transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
-                        title="Edit Record"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleOpenDelete(item)}
-                        className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-rose-600 hover:bg-rose-50 transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
-                        title="Delete Record"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          onClick={() => handleOpenEdit(item)}
+                          className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-[#2d5a3f] hover:bg-[#eef3ed] transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
+                          title="Edit Record"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => handleOpenDelete(item)}
+                          className="p-1.5 sm:p-2 rounded-lg text-[#5e7063] hover:text-rose-600 hover:bg-rose-50 transition inline-flex items-center justify-center min-w-[30px] min-h-[30px]"
+                          title="Delete Record"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

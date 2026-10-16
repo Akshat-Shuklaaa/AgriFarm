@@ -54,10 +54,15 @@ This guide details the exact production deployment steps for the **Agricultural 
    CORS_ORIGINS=https://your-agrifarm-frontend.vercel.app
    JWT_SECRET=production_generated_high_entropy_secret_key_32_chars_minimum
    JWT_EXPIRES_IN=1d
+   # Optional: Automatically bootstrap primary administrator on first boot if no admin exists
+   ADMIN_EMAIL=admin@yourfarmdomain.com
+   ADMIN_PASSWORD=YourStrongInitialAdminPassword123!
    ```
 3. **Health Check Path:**
    - Set health check path to `/api/health`.
-4. **Deploy:** Click **Create Web Service**. Note the assigned URL, e.g., `https://agrifarm-backend.onrender.com`.
+4. **Deploy & Initialize Administrator:**
+   - Click **Create Web Service**. Note the assigned URL, e.g., `https://agrifarm-backend.onrender.com`.
+   - On first startup, the backend automatically detects whether any administrator exists. If `ADMIN_EMAIL` and `ADMIN_PASSWORD` are defined in the environment, it initializes the primary admin account safely. Alternatively, run `npm run bootstrap:admin` via Render Shell.
 
 ---
 

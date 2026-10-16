@@ -121,50 +121,68 @@ npm run seed:dry-run
 
 ---
 
+## 🔐 Authentication & Role-Based Access Control (RBAC)
+
+The system features an enterprise-grade authentication, authorization, and audit logging architecture backed by Redis:
+
+### 1. Security Architecture
+- **Password Protection:** Passwords securely hashed with **bcrypt (12 salt rounds)**. Plaintext passwords and hashes are never exposed in API responses or frontend state.
+- **Session Management:** Stateful Redis sessions (`auth:session:<id>`) with 24-hour TTL, cross-checked on every request. Instant revocation upon user logout or account deactivation.
+- **CSRF Defense:** State-changing API mutations protected via dual-cookie/header validation (`X-CSRF-Token` / `X-Requested-With`).
+- **Brute-Force Protection:** Automatically tracks failed login attempts in Redis (`auth:login_attempts:<email>`). Enforces a 15-minute account lockout after 5 consecutive failed attempts.
+- **Security Audit Logging:** Immutable audit trail recorded in Redis (`auth:audit:<id>`) indexed by sorted set timestamps. Automatically logs all logins, logouts, administrative changes, and entity mutations with actor metadata and sanitized payloads.
+- **Namespace Isolation:** All authentication and security records reside under the strictly isolated `auth:*` key space, guaranteeing complete zero-interference with all 28 existing farm management entity records.
+
+### 2. Role-Based Access Control (RBAC) Matrix
+
+| Resource Category | Operations | Admin | Farm Manager | Inventory Manager | Worker |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **User Directory** | CRUD, Role, Status | Full (`*`) | Denied | Denied | Denied |
+| **Audit Logs** | Security Trail | Read | Denied | Denied | Denied |
+| **System Settings** | Architecture & Keys | Full (`*`) | Denied | Denied | Denied |
+| **Land & Farms** | Farmers, Farms, Fields, Soil, Water | Full (`*`) | Full CRUD | Read-only | Read-only |
+| **Crops & Seasons** | Crops, Varieties, Seasons, Harvests | Full (`*`) | Full CRUD | Read-only | Read-only |
+| **Supplies & Stock** | Suppliers, Seeds, Fertilizer, Pesticide | Full (`*`) | Read-only | Full CRUD | Denied |
+| **Workforce** | Workers, Attendance, Assignments | Full (`*`) | Full CRUD | Assigned Tools | Log Check-in |
+| **Machinery** | Equipment & Maintenance | Full (`*`) | Read-only | Full CRUD | Read assigned |
+| **Sales & Billing** | Customers, Invoices, Payments | Full (`*`) | Create/Edit (No Delete) | Denied | Denied |
+
+### 3. Demo Role Accounts
+
+For quick local testing and evaluation, the login screen provides 1-click quick-fill cards for the 4 role tiers:
+
+| Role | Email | Password | Scope |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@agrifarm.local` | `AdminPassword123!` | System administrator (full access, user directory, audit logs) |
+| **Farm Manager** | `manager@agrifarm.local` | `ManagerPassword123!` | Farm operations, land, crops, workforce, harvests, sales |
+| **Inventory Manager** | `inventory@agrifarm.local` | `InventoryPassword123!` | Suppliers, inventory batches, fertilizers, seeds, machinery |
+| **Worker** | `worker@agrifarm.local` | `WorkerPassword123!` | Field tasks, view assigned equipment, check-in attendance |
+
+Seed demo accounts with zero data overwrite:
+```bash
+npm run seed:users
+```
+
+Or bootstrap a custom primary administrator:
+```bash
+ADMIN_EMAIL="custom.admin@domain.com" ADMIN_PASSWORD="YourSecurePassword123!" npm run bootstrap:admin
+```
+
+---
+
 ## 🧪 Verification & Automated Testing
 
-The repository includes a 13-point automated integration test suite validating:
-- Redis connectivity
-- Health endpoint response
-- Canonical records preservation (Farmer 101, Farm 201, Crop 701, etc.)
-- Full CRUD lifecycle (POST -> GET -> PUT -> DELETE)
-- Referential integrity protection (blocking deletions of parents with active dependents)
-- Validation failure handling (400 Bad Request)
-- Missing record responses (404 Not Found)
-- Dashboard metric computations from live Redis data
+### 1. Authentication & RBAC Test Suite (50 Automated Checks)
+Validates password hashing, brute-force lockout, session invalidation, account deactivation, last-admin protection, permission enforcement, and key isolation:
+```bash
+npm run test:auth
+```
 
-To execute the test suite:
+### 2. Entity Integration Test Suite (13 Automated Checks)
+Validates referential integrity, foreign key relations, and CRUD pipeline operations across farm management entities:
 ```bash
 cd backend
 npx tsx test-suite.ts
-```
-
-Output:
-```
-======================================================
- AGRICULTURAL FARM MANAGEMENT SYSTEM - VERIFICATION  
-======================================================
-
-[PASS] Step 1: Backend connects to Redis
-[PASS] Step 2: GET /api/health returns 200 OK and valid status
-[PASS] Step 3: GET /api/farmers returns actual records from Redis
-[PASS] Step 4: POST /api/farmers creates a new Redis record with unique ID
-[PASS] Step 5: GET /api/farmers/:id retrieves the created record
-[PASS] Step 6: PUT /api/farmers/:id updates the record in Redis
-[PASS] Step 7: DELETE /api/farmers/:id deletes record cleanly
-[PASS] Step 8: Related farmer/farm relationships remain consistent
-[PASS] Step 9: Invalid data is rejected with 400 Bad Request
-[PASS] Step 10: Missing records produce 404 Not Found
-[PASS] Step 11: Deletion of farmer with dependent farms is blocked
-[PASS] Step 12: Dashboard statistics compute real Redis metrics
-[PASS] Step 13: Existing canonical Redis records remain intact
-
-======================================================
-               TEST RESULTS SUMMARY                   
-======================================================
-Passed: 13 / 13
-ALL VERIFICATION CRITERIA SATISFIED SUCCESSFULLY!
-======================================================
 ```
 
 ---

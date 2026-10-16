@@ -35,13 +35,22 @@ class ApiError extends Error {
   }
 }
 
+let currentCsrfToken: string | null = null;
+export const setCsrfToken = (token: string | null) => {
+  currentCsrfToken = token;
+};
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
+
+  if (currentCsrfToken) {
+    headers['X-CSRF-Token'] = currentCsrfToken;
+  }
 
   try {
     const res = await fetch(url, {
@@ -99,7 +108,7 @@ export function createEntityApi<T = any>(resourcePath: string) {
 
 export const api = {
   // System
-  health: () => request<{ status: string; uptime: string; redis: string }>('/health'),
+  health: () => request<{ status: string; uptime: string; redis: { connected: boolean; ping: string } }>('/health'),
   dashboardStats: () =>
     request<{
       entityCounts: Record<string, number>;
@@ -112,20 +121,43 @@ export const api = {
       };
     }>('/dashboard/stats'),
 
-  // Auth
+  // Authentication
   auth: {
-    login: (credentials: { username: string; password: string }) =>
-      request<{ user: any; token: string }>('/auth/login', {
+    login: (credentials: { email: string; password: string }) =>
+      request<{ user: any; token: string; csrfToken: string }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
       }),
-    register: (userData: { username: string; password: string; role?: string; email?: string }) =>
-      request<{ user: any; token: string }>('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      }),
-    me: () => request<{ user: any }>('/auth/me'),
+    me: () => request<{ user: any; csrfToken?: string }>('/auth/me'),
     logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
+    getCsrfToken: () => request<{ csrfToken: string }>('/auth/csrf-token'),
+  },
+
+  // User Management (Admin only)
+  users: {
+    getAll: (params?: QueryParams) => request<any[]>(`/users${buildQuery(params)}`),
+    getById: (id: string) => request<any>(`/users/${id}`),
+    create: (data: { name: string; email: string; password: string; role?: string }) =>
+      request<any>('/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    updateRole: (id: string, role: string) =>
+      request<any>(`/users/${id}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role }),
+      }),
+    updateStatus: (id: string, status: 'active' | 'inactive') =>
+      request<any>(`/users/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
+    delete: (id: string) => request<{ message: string }>(`/users/${id}`, { method: 'DELETE' }),
+  },
+
+  // Audit Logs (Admin only)
+  auditLogs: {
+    getAll: (params?: QueryParams) => request<any[]>(`/audit-logs${buildQuery(params)}`),
   },
 
   // 28 Entities

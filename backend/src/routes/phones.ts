@@ -18,8 +18,16 @@ import {
   paginationQuerySchema,
 } from '../validation/schemas';
 import { sendSuccess, sendError } from '../utils/response';
+import { authenticateSession, authorizeEntity } from '../middleware/auth';
 
 const router = Router();
+
+// Enforce session authentication and resource-level RBAC
+router.use(authenticateSession);
+router.use('/farmer', authorizeEntity('farmerPhones'));
+router.use('/supplier', authorizeEntity('supplierPhones'));
+router.use('/worker', authorizeEntity('workerPhones'));
+router.use('/customer', authorizeEntity('customerPhones'));
 
 // ================= Farmer Phone =================
 router.get('/farmer', validateQuery(paginationQuerySchema), async (req: Request, res: Response) => {

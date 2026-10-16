@@ -13,7 +13,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().default('supersecret_agri_farm_jwt_key_2026_change_in_prod'),
   JWT_EXPIRES_IN: z.string().default('1d'),
   CORS_ORIGINS: z.string().optional(),
-  CORS_ORIGIN: z.string().optional().default('http://localhost:3000,http://localhost:5173'),
+  CORS_ORIGIN: z.string().optional().default('http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173'),
 });
 
 const parsed = envSchema.safeParse(process.env);

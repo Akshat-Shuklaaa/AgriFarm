@@ -25,7 +25,10 @@ import {
   ShieldCheck,
   ChevronDown,
   X,
+  LogOut,
+  ShieldAlert,
 } from 'lucide-react';
+import { useAuth, ROLE_LABELS } from '../lib/authContext';
 
 interface SidebarProps {
   activeView: string;
@@ -71,6 +74,8 @@ export function Sidebar({
       document.body.style.overflow = '';
     };
   }, [mobileOpen]);
+
+  const { user, logout, isAllowedView } = useAuth();
 
   const handleNavClick = (viewId: string) => {
     onSelectView(viewId);
@@ -137,8 +142,16 @@ export function Sidebar({
       ],
     },
     {
-      title: 'System',
-      items: [{ id: 'settings', label: 'Settings', icon: Settings }],
+      title: 'System & Admin',
+      items: [
+        ...(user?.role === 'admin'
+          ? [
+              { id: 'userManagement', label: 'User Directory', icon: Users },
+              { id: 'auditLogs', label: 'Security Audit Logs', icon: ShieldAlert },
+            ]
+          : []),
+        { id: 'settings', label: 'Architecture & Keys', icon: Settings },
+      ],
     },
   ];
 
@@ -184,6 +197,9 @@ export function Sidebar({
       {/* Navigation List */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-4 text-xs" aria-label="Main Navigation">
         {navGroups.map((group) => {
+          const visibleItems = group.items.filter((item) => isAllowedView(item.id));
+          if (visibleItems.length === 0) return null;
+
           const isCollapsed = collapsedGroups[group.title];
           return (
             <div key={group.title}>
@@ -200,14 +216,14 @@ export function Sidebar({
               </button>
               {!isCollapsed && (
                 <div className="mt-1 space-y-0.5">
-                  {group.items.map((item) => {
+                  {visibleItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeView === item.id;
                     return (
                       <button
                         key={item.id}
                         onClick={() => handleNavClick(item.id)}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2d5a3f] ${
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2d5a3f] cursor-pointer ${
                           isActive
                             ? 'bg-[#2d5a3f] text-white font-medium shadow-sm shadow-[#2d5a3f]/15'
                             : 'text-[#3c4a40] hover:bg-[#f0f4f0] hover:text-[#1c2720]'
@@ -226,15 +242,34 @@ export function Sidebar({
       </nav>
 
       {/* User / Session Footer */}
-      <div className="p-3.5 border-t border-[#e2eae1] bg-[#fafcfa] flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#d8e5d6] text-[#2d5a3f] font-semibold text-xs flex items-center justify-center shrink-0">
-          RK
+      {user && (
+        <div className="p-3 sm:p-3.5 border-t border-[#e2eae1] bg-[#fafcfa] flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-full bg-[#d8e5d6] text-[#2d5a3f] font-bold text-xs flex items-center justify-center shrink-0">
+              {user.name
+                ? user.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase()
+                : 'U'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-[#1c2720] truncate">{user.name}</p>
+              <p className="text-[10px] text-[#5e7063] truncate">{ROLE_LABELS[user.role] || user.role}</p>
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            className="p-1.5 rounded-lg text-[#5e7063] hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0 cursor-pointer"
+            title="Sign Out"
+            aria-label="Sign Out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-[#1c2720] truncate">Ramesh Kumar</p>
-          <p className="text-[10px] text-[#5e7063] truncate">Lead Farm Operator</p>
-        </div>
-      </div>
+      )}
     </>
   );
 

@@ -9,7 +9,10 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "seed": "tsx ../database/seed.ts",
-    "seed:dry-run": "tsx ../database/seed.ts --dry-run"
+    "seed:dry-run": "tsx ../database/seed.ts --dry-run",
+    "bootstrap:admin": "tsx src/scripts/bootstrapAdmin.ts",
+    "seed:users": "tsx src/scripts/seedDemoUsers.ts",
+    "test:auth": "tsx src/tests/auth.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
