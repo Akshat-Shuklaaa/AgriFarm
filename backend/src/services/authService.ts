@@ -357,13 +357,15 @@ export class AuthService {
     }
 
     // Apply filters
-    if (params.search) {
-      const q = params.search.toLowerCase();
+    if (params.search && params.search.trim()) {
+      const q = params.search.toLowerCase().trim();
+      const cleanQ = q.startsWith('#') ? q.slice(1).trim() : q;
       users = users.filter(
         (u) =>
           u.name.toLowerCase().includes(q) ||
           u.email.toLowerCase().includes(q) ||
-          u.id.includes(q)
+          u.id.toLowerCase().includes(cleanQ) ||
+          u.id.toLowerCase().includes(q)
       );
     }
 

@@ -114,7 +114,7 @@ export function AuditLogsView() {
         ) : (
           <div className="overflow-x-auto w-full">
             <table className="w-full min-w-[750px] text-left text-xs">
-              <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063] font-semibold select-none">
+              <thead className="bg-[#f2f5f1] border-b border-[#e0e7df] text-[#5e7063] font-semibold select-none">
                 <tr>
                   <th className="py-3 px-4">Timestamp</th>
                   <th className="py-3 px-4">Actor</th>

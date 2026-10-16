@@ -238,7 +238,7 @@ export function UserManagementView() {
       </div>
 
       {/* Filter and Search Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-[#e2eae1]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-[#e0e7df] shadow-sm">
         <div className="relative w-full sm:w-80">
           <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -249,8 +249,21 @@ export function UserManagementView() {
               setPage(1);
             }}
             placeholder="Search users by name, email, or ID..."
-            className="w-full pl-8 pr-3 py-2 sm:py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] text-[#1c2720]"
+            className="w-full pl-8 pr-8 py-2 sm:py-1.5 text-xs bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] text-[#1c2720]"
           />
+          {search && (
+            <button
+              onClick={() => {
+                setSearch('');
+                setPage(1);
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#87986a] hover:text-[#1c2720] p-0.5 rounded transition-colors"
+              title="Clear search"
+              aria-label="Clear search query"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
@@ -260,7 +273,7 @@ export function UserManagementView() {
               setRoleFilter(e.target.value);
               setPage(1);
             }}
-            className="text-xs px-3 py-1.5 bg-[#f8faf7] border border-[#e2eae1] rounded-lg text-[#1c2720] focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+            className="text-xs px-3 py-1.5 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg text-[#1c2720] focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
           >
             <option value="">All Roles</option>
             <option value="admin">Admin</option>
@@ -275,7 +288,7 @@ export function UserManagementView() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="text-xs px-3 py-1.5 bg-[#f8faf7] border border-[#e2eae1] rounded-lg text-[#1c2720] focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+            className="text-xs px-3 py-1.5 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg text-[#1c2720] focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
           >
             <option value="">All Statuses</option>
             <option value="active">Active</option>
@@ -285,7 +298,7 @@ export function UserManagementView() {
       </div>
 
       {/* User Table Card */}
-      <div className="bg-white rounded-2xl border border-[#e2eae1] shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e0e7df] shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-[#2d5a3f]/20 border-t-[#2d5a3f] rounded-full animate-spin mx-auto mb-3" />
@@ -300,16 +313,31 @@ export function UserManagementView() {
           <div className="p-12 text-center text-xs text-[#5e7063]">
             <Users className="w-8 h-8 mx-auto mb-2 text-[#87986a]" />
             <p className="font-semibold text-sm text-[#1c2720]">No Users Found</p>
-            <p className="mt-1">
-              {search || roleFilter || statusFilter
-                ? 'Try adjusting your search query or filters'
-                : 'Click "Register User" to create the first account'}
-            </p>
+            {search.trim() || roleFilter || statusFilter ? (
+              <div className="mt-2 space-y-3">
+                <p>
+                  No operators match your query {search.trim() ? <>(&ldquo;<strong className="text-[#1c2720]">{search.trim()}</strong>&rdquo;)</> : null}.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearch('');
+                    setRoleFilter('');
+                    setStatusFilter('');
+                    setPage(1);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#eef3ed] text-[#2d5a3f] rounded-lg font-medium hover:bg-[#e0e7df] transition text-xs"
+                >
+                  <X className="w-3 h-3" /> Clear filters and search
+                </button>
+              </div>
+            ) : (
+              <p className="mt-1">Click &ldquo;Register User&rdquo; to create the first account</p>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto w-full">
             <table className="w-full min-w-[700px] text-left text-xs">
-              <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063] font-semibold select-none">
+              <thead className="bg-[#f2f5f1] border-b border-[#e0e7df] text-[#5e7063] font-semibold select-none">
                 <tr>
                   <th className="py-3 px-4">Operator</th>
                   <th className="py-3 px-4">Email</th>
@@ -461,7 +489,7 @@ export function UserManagementView() {
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="e.g. Suresh Patel"
                   required
-                  className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                  className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                 />
               </div>
 
@@ -473,7 +501,7 @@ export function UserManagementView() {
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="suresh@agrifarm.local"
                   required
-                  className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                  className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                 />
               </div>
 
@@ -486,7 +514,7 @@ export function UserManagementView() {
                   placeholder="••••••••"
                   required
                   minLength={8}
-                  className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                  className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                 />
               </div>
 
@@ -495,7 +523,7 @@ export function UserManagementView() {
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as Role)}
-                  className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                  className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                 >
                   <option value="worker">Worker (Field Tasks & Attendance)</option>
                   <option value="inventory_manager">Inventory Manager (Supplies & Machinery)</option>
@@ -557,7 +585,7 @@ export function UserManagementView() {
                 <select
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value as Role)}
-                  className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                  className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                 >
                   <option value="worker">Worker</option>
                   <option value="inventory_manager">Inventory Manager</option>

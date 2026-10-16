@@ -88,7 +88,7 @@ export function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faf7] flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-[#f7f9f6] flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8">
       {/* Background decoration */}
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
@@ -103,7 +103,7 @@ export function LoginView() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e2eae1] shadow-xl shadow-[#2d5a3f]/5 space-y-5">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e0e7df] shadow-xl shadow-[#2d5a3f]/5 space-y-5">
           <div>
             <h2 className="text-lg font-bold text-[#1c2720]">Sign In</h2>
             <p className="text-xs text-[#5e7063] mt-0.5">
@@ -130,7 +130,7 @@ export function LoginView() {
                   placeholder="name@agrifarm.local"
                   required
                   autoComplete="email"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2d5a3f] text-[#1c2720] transition-all"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-[#f2f5f1] border border-[#e0e7df] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2d5a3f] text-[#1c2720] transition-all"
                 />
               </div>
             </div>
@@ -146,7 +146,7 @@ export function LoginView() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="w-full pl-10 pr-10 py-2.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2d5a3f] text-[#1c2720] transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 text-xs bg-[#f2f5f1] border border-[#e0e7df] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2d5a3f] text-[#1c2720] transition-all"
                 />
                 <button
                   type="button"

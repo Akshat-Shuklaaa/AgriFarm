@@ -7,7 +7,7 @@ export const paginationQuerySchema = z.object({
   search: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
-});
+}).passthrough();
 
 // Auth & User Management Schemas
 export const authLoginSchema = z.object({

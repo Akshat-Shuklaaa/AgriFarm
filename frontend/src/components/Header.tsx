@@ -10,6 +10,9 @@ interface HeaderProps {
   onRefresh?: () => void;
   isRefreshing?: boolean;
   onOpenMobileNav?: () => void;
+  searchValue?: string;
+  onSearchChange?: (val: string) => void;
+  searchPlaceholder?: string;
 }
 
 interface NotificationItem {
@@ -27,6 +30,9 @@ export function Header({
   onRefresh,
   isRefreshing,
   onOpenMobileNav,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder,
 }: HeaderProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([
@@ -122,15 +128,39 @@ export function Header({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Search Input Placeholder (hidden on mobile, visible on tablet/desktop) */}
-        <div className="relative hidden md:block">
-          <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search records or IDs..."
-            className="pl-8 pr-3 py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] w-40 lg:w-56 text-[#1c2720] placeholder-[#87986a]"
-          />
-        </div>
+        {/* Header Search Input */}
+        {onSearchChange ? (
+          <div className="relative hidden md:block">
+            <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchValue ?? ''}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder={searchPlaceholder || 'Search records or IDs...'}
+              className="pl-8 pr-7 py-1.5 text-xs bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] w-40 lg:w-56 text-[#1c2720] placeholder-[#87986a] transition-all"
+            />
+            {searchValue && (
+              <button
+                onClick={() => onSearchChange('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#87986a] hover:text-[#1c2720] p-0.5 rounded transition-colors"
+                title="Clear"
+                aria-label="Clear search"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="relative hidden md:block opacity-60">
+            <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              disabled
+              placeholder="Select an entity to search..."
+              className="pl-8 pr-3 py-1.5 text-xs bg-[#f2f5f1] border border-[#e0e7df] rounded-lg cursor-not-allowed w-40 lg:w-56 text-[#5e7063] placeholder-[#87986a]"
+            />
+          </div>
+        )}
 
         {/* Refresh Button */}
         {onRefresh && (
@@ -234,7 +264,7 @@ export function Header({
                 )}
               </div>
 
-              <div className="p-2.5 bg-[#f8faf7] border-t border-[#e2eae1] text-center">
+              <div className="p-2.5 bg-[#f7f9f6] border-t border-[#e0e7df] text-center">
                 <span className="text-[10px] text-[#5e7063] font-medium">
                   Redis Event Logs Synchronized
                 </span>
@@ -248,7 +278,7 @@ export function Header({
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-[#e2eae1] hover:bg-[#f0f4f0] transition-colors cursor-pointer"
+              className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-[#e0e7df] hover:bg-[#f0f4f0] transition-colors cursor-pointer"
               aria-label="User profile options"
             >
               <div className="w-7 h-7 rounded-lg bg-[#2d5a3f] text-white font-bold text-xs flex items-center justify-center shrink-0">
@@ -272,8 +302,8 @@ export function Header({
             </button>
 
             {profileOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#e2eae1] p-3 space-y-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="p-2 bg-[#f8faf7] rounded-xl border border-[#e2eae1] space-y-1">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#e0e7df] p-3 space-y-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="p-2 bg-[#f7f9f6] rounded-xl border border-[#e0e7df] space-y-1">
                   <p className="text-xs font-bold text-[#1c2720] truncate">{user.name}</p>
                   <p className="text-[11px] font-mono text-[#5e7063] truncate">{user.email}</p>
                   <div className="pt-1 flex items-center justify-between">

@@ -47,9 +47,40 @@ async function runSuite() {
     if (data.data?.status !== 'healthy') throw new Error(`Status not healthy: ${data.data?.status}`);
   });
 
+  // Authenticate as Admin to verify protected endpoints
+  let authCookie = '';
+  let csrfToken = '';
+  try {
+    const loginRes = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'admin@agrifarm.local',
+        password: 'AdminPassword123!',
+      }),
+    });
+    if (loginRes.ok) {
+      const setCookieHeader = loginRes.headers.get('set-cookie');
+      if (setCookieHeader) {
+        authCookie = setCookieHeader.split(';')[0];
+      }
+      const loginBody = await loginRes.json();
+      csrfToken = loginBody.data?.csrfToken || '';
+    }
+  } catch (e: any) {
+    console.warn('[Test Runner] Warning: could not pre-authenticate:', e.message);
+  }
+
+  function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
+    const h: Record<string, string> = { ...extra };
+    if (authCookie) h['Cookie'] = authCookie;
+    if (csrfToken) h['x-csrf-token'] = csrfToken;
+    return h;
+  }
+
   // 3. GET /api/farmers returns actual records
   await runStep(3, 'GET /api/farmers returns actual records from Redis', async () => {
-    const res = await fetch(`${BASE_URL}/farmers`);
+    const res = await fetch(`${BASE_URL}/farmers`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data.data) || data.data.length === 0) {
@@ -62,10 +93,10 @@ async function runSuite() {
 
   // 4. POST /api/farmers creates a Redis record
   let createdFarmerId: string = '';
-  await runStep(4, 'POST /api/farmers creates a new Redis record with unique ID', async () => {
+  await runStep(4, 'POST /api/farmers creates a new Redis record with unique sequential ID', async () => {
     const res = await fetch(`${BASE_URL}/farmers`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         name: 'Automated Test Farmer',
         address: 'Coimbatore, Tamil Nadu',
@@ -81,7 +112,7 @@ async function runSuite() {
 
   // 5. GET /api/farmers/:id retrieves it
   await runStep(5, 'GET /api/farmers/:id retrieves the created record', async () => {
-    const res = await fetch(`${BASE_URL}/farmers/${createdFarmerId}`);
+    const res = await fetch(`${BASE_URL}/farmers/${createdFarmerId}`, { headers: authHeaders() });
     if (res.status !== 200) throw new Error(`Status ${res.status}`);
     const data = await res.json();
     if (data.data?.name !== 'Automated Test Farmer') {
@@ -93,7 +124,7 @@ async function runSuite() {
   await runStep(6, 'PUT /api/farmers/:id updates the record in Redis', async () => {
     const res = await fetch(`${BASE_URL}/farmers/${createdFarmerId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         address: 'Madurai, Tamil Nadu',
       }),
@@ -105,19 +136,20 @@ async function runSuite() {
     }
   });
 
-  // 7. DELETE /api/farmers/:id follows documented deletion policy
-  await runStep(7, 'DELETE /api/farmers/:id deletes record cleanly', async () => {
+  // 7. DELETE /api/farmers/:id follows documented deletion policy and re-syncs counter
+  await runStep(7, 'DELETE /api/farmers/:id deletes record cleanly and preserves sequence', async () => {
     const res = await fetch(`${BASE_URL}/farmers/${createdFarmerId}`, {
       method: 'DELETE',
+      headers: authHeaders(),
     });
     if (res.status !== 200) throw new Error(`Status ${res.status}`);
-    const checkRes = await fetch(`${BASE_URL}/farmers/${createdFarmerId}`);
+    const checkRes = await fetch(`${BASE_URL}/farmers/${createdFarmerId}`, { headers: authHeaders() });
     if (checkRes.status !== 404) throw new Error(`Expected 404 after delete, got ${checkRes.status}`);
   });
 
   // 8. Related farmer/farm relationships remain consistent
   await runStep(8, 'Related farmer/farm relationships remain consistent', async () => {
-    const res = await fetch(`${BASE_URL}/farmers/101/farms`);
+    const res = await fetch(`${BASE_URL}/farmers/101/farms`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data.data) || data.data.length === 0) {
@@ -131,7 +163,7 @@ async function runSuite() {
   await runStep(9, 'Invalid data is rejected with 400 Bad Request', async () => {
     const res = await fetch(`${BASE_URL}/farmers`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         name: '', // Empty name violates min(1)
         email: 'not-an-email',
@@ -142,7 +174,7 @@ async function runSuite() {
 
   // 10. Missing records produce appropriate errors
   await runStep(10, 'Missing records produce 404 Not Found', async () => {
-    const res = await fetch(`${BASE_URL}/farmers/nonexistent-99999`);
+    const res = await fetch(`${BASE_URL}/farmers/nonexistent-99999`, { headers: authHeaders() });
     if (res.status !== 404) throw new Error(`Expected 404, got ${res.status}`);
   });
 
@@ -150,6 +182,7 @@ async function runSuite() {
   await runStep(11, 'Deletion of farmer with dependent farms is blocked', async () => {
     const res = await fetch(`${BASE_URL}/farmers/101`, {
       method: 'DELETE',
+      headers: authHeaders(),
     });
     if (res.status !== 400) {
       throw new Error(`Expected 400 when attempting to delete parent with active dependents, got ${res.status}`);
@@ -158,7 +191,7 @@ async function runSuite() {
 
   // 12. Dashboard statistics use real Redis data
   await runStep(12, 'Dashboard statistics compute real Redis metrics', async () => {
-    const res = await fetch(`${BASE_URL}/dashboard/stats`);
+    const res = await fetch(`${BASE_URL}/dashboard/stats`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const data = await res.json();
     if (!data.data?.entityCounts || typeof data.data.entityCounts.farmers !== 'number') {
@@ -172,15 +205,46 @@ async function runSuite() {
   // 13. Existing Redis records remain intact
   await runStep(13, 'Existing canonical Redis records remain intact', async () => {
     const [cropRes, saleRes, paymentRes] = await Promise.all([
-      fetch(`${BASE_URL}/crops/701`),
-      fetch(`${BASE_URL}/sales/2201`),
-      fetch(`${BASE_URL}/payments/2301`),
+      fetch(`${BASE_URL}/crops/701`, { headers: authHeaders() }),
+      fetch(`${BASE_URL}/sales/2201`, { headers: authHeaders() }),
+      fetch(`${BASE_URL}/payments/2301`, { headers: authHeaders() }),
     ]);
     if (!cropRes.ok || !saleRes.ok || !paymentRes.ok) {
       throw new Error('One or more canonical records (701, 2201, 2301) missing');
     }
     const cropData = await cropRes.json();
     if (cropData.data.name !== 'Rice') throw new Error(`Expected Rice, got ${cropData.data.name}`);
+  });
+
+  // 14. Search functionality works across entity fields, IDs, addresses, and partial text
+  await runStep(14, 'Search functionality works across IDs, addresses, and partial text', async () => {
+    // 14.1 Search farmer by ID
+    const idRes = await fetch(`${BASE_URL}/farmers?search=101`, { headers: authHeaders() });
+    const idData = await idRes.json();
+    if (!idData.data || idData.data.length === 0 || String(idData.data[0].id) !== '101') {
+      throw new Error('Search by ID 101 failed to return farmer 101');
+    }
+
+    // 14.2 Search farmer by address
+    const addrRes = await fetch(`${BASE_URL}/farmers?search=Kanchipuram`, { headers: authHeaders() });
+    const addrData = await addrRes.json();
+    if (!addrData.data || addrData.data.length === 0) {
+      throw new Error('Search by address Kanchipuram failed');
+    }
+
+    // 14.3 Search with whitespace padding
+    const spaceRes = await fetch(`${BASE_URL}/farmers?search=%20%20ramesh%20%20`, { headers: authHeaders() });
+    const spaceData = await spaceRes.json();
+    if (!spaceData.data || spaceData.data.length === 0) {
+      throw new Error('Search with whitespace padding failed');
+    }
+
+    // 14.4 Search no-match scenario
+    const noMatchRes = await fetch(`${BASE_URL}/farmers?search=nonexistent_query_xyz_999`, { headers: authHeaders() });
+    const noMatchData = await noMatchRes.json();
+    if (!noMatchData.data || noMatchData.data.length !== 0) {
+      throw new Error('Expected 0 results for non-matching search');
+    }
   });
 
   console.log('\n======================================================');

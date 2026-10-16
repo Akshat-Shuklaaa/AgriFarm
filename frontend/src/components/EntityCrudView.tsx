@@ -23,9 +23,16 @@ import {
 interface EntityCrudViewProps {
   config: EntityConfig;
   onNavigateToEntity?: (entityKey: string, id?: string) => void;
+  externalSearch?: string;
+  onSearchChange?: (val: string) => void;
 }
 
-export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewProps) {
+export function EntityCrudView({
+  config,
+  onNavigateToEntity,
+  externalSearch,
+  onSearchChange,
+}: EntityCrudViewProps) {
   const { canPerform } = useAuth();
   const canCreate = canPerform(config.key, 'create');
   const canUpdate = canPerform(config.key, 'update');
@@ -39,7 +46,15 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [limit] = useState(10);
-  const [search, setSearch] = useState('');
+  const [internalSearch, setInternalSearch] = useState('');
+  const search = externalSearch !== undefined ? externalSearch : internalSearch;
+  const setSearch = (val: string) => {
+    if (onSearchChange) {
+      onSearchChange(val);
+    } else {
+      setInternalSearch(val);
+    }
+  };
 
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -222,7 +237,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-xl border border-[#e2eae1]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-xl border border-[#e0e7df] shadow-sm">
         <div className="relative w-full sm:w-80">
           <Search className="w-3.5 h-3.5 text-[#87986a] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -232,9 +247,22 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder={`Search ${config.pluralLabel.toLowerCase()}...`}
-            className="w-full pl-8 pr-3 py-2 sm:py-1.5 text-xs bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] text-[#1c2720]"
+            placeholder={`Search ${config.pluralLabel.toLowerCase()} by name, ID, address...`}
+            className="w-full pl-8 pr-8 py-2 sm:py-1.5 text-xs bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f] text-[#1c2720] transition-colors"
           />
+          {search && (
+            <button
+              onClick={() => {
+                setSearch('');
+                setPage(1);
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#87986a] hover:text-[#1c2720] p-0.5 rounded transition-colors"
+              title="Clear search"
+              aria-label="Clear search query"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-2 text-xs text-[#5e7063]">
@@ -245,7 +273,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
       </div>
 
       {/* Main Table */}
-      <div className="bg-white rounded-2xl border border-[#e2eae1] shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e0e7df] shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-[#2d5a3f]/20 border-t-[#2d5a3f] rounded-full animate-spin mx-auto mb-3" />
@@ -260,14 +288,26 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
           <div className="p-12 text-center text-xs text-[#5e7063]">
             <Info className="w-8 h-8 mx-auto mb-2 text-[#87986a]" />
             <p className="font-semibold text-sm text-[#1c2720]">No {config.pluralLabel} Found</p>
-            <p className="mt-1">
-              {search ? 'Try clearing your search query' : `Click "Add ${config.label}" to register your first record`}
-            </p>
+            {search.trim() ? (
+              <div className="mt-2 space-y-3">
+                <p>
+                  No records match &ldquo;<span className="font-semibold text-[#1c2720]">{search.trim()}</span>&rdquo;.
+                </p>
+                <button
+                  onClick={() => setSearch('')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#eef3ed] text-[#2d5a3f] rounded-lg font-medium hover:bg-[#e0e7df] transition text-xs"
+                >
+                  <X className="w-3 h-3" /> Clear search query
+                </button>
+              </div>
+            ) : (
+              <p className="mt-1">Click &ldquo;Add {config.label}&rdquo; to register your first record</p>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto w-full">
             <table className="w-full min-w-[620px] text-left text-xs">
-              <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063] font-semibold select-none">
+              <thead className="bg-[#f2f5f1] border-b border-[#e0e7df] text-[#5e7063] font-semibold select-none">
                 <tr>
                   {config.columns.map((col) => (
                     <th key={col.key} className="py-3 px-3 sm:px-4">
@@ -386,7 +426,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                       <select
                         value={formData[field.name] ?? ''}
                         onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                        className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                        className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                       >
                         <option value="">-- Select {field.label} --</option>
                         {field.relation && relationOptions[field.name]
@@ -407,7 +447,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                         value={formData[field.name] ?? ''}
                         onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                         placeholder={field.placeholder}
-                        className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                        className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                       />
                     ) : (
                       <input
@@ -415,7 +455,7 @@ export function EntityCrudView({ config, onNavigateToEntity }: EntityCrudViewPro
                         value={formData[field.name] ?? ''}
                         onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                         placeholder={field.placeholder}
-                        className="w-full text-xs px-3 py-2 bg-[#f8faf7] border border-[#e2eae1] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
+                        className="w-full text-xs px-3 py-2 bg-[#f2f5f1] border border-[#e0e7df] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2d5a3f]"
                       />
                     )}
 

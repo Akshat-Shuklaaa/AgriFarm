@@ -28,6 +28,7 @@ import {
 function AppContent() {
   const { user, loading, isAuthenticated, isAllowedView } = useAuth();
   const [activeView, setActiveView] = useState('dashboard');
+  const [headerSearch, setHeaderSearch] = useState('');
   const [redisConnected, setRedisConnected] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [healthInfo, setHealthInfo] = useState<any>(null);
@@ -62,7 +63,7 @@ function AppContent() {
   // If still checking auth session
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8faf7] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f7f9f6] flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 rounded-2xl bg-[#2d5a3f] flex items-center justify-center text-white shadow-lg shadow-[#2d5a3f]/25 mb-4 animate-bounce">
           <Wheat className="w-6 h-6" />
         </div>
@@ -100,12 +101,13 @@ function AppContent() {
   const isViewPermitted = isAllowedView(activeView);
 
   return (
-    <div className="flex min-h-screen bg-[#f8faf7] w-full overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#f7f9f6] w-full overflow-x-hidden">
       {/* Sidebar: persistent on desktop (lg+), responsive slide-out drawer on mobile/tablet */}
       <Sidebar
         activeView={activeView}
         onSelectView={(view) => {
           setActiveView(view);
+          setHeaderSearch('');
           setMobileNavOpen(false);
         }}
         redisConnected={redisConnected}
@@ -121,6 +123,9 @@ function AppContent() {
           onRefresh={handleManualRefresh}
           isRefreshing={isRefreshing}
           onOpenMobileNav={() => setMobileNavOpen(true)}
+          searchValue={headerSearch}
+          onSearchChange={currentEntityConfig ? setHeaderSearch : undefined}
+          searchPlaceholder={currentEntityConfig ? `Search ${currentEntityConfig.pluralLabel.toLowerCase()}...` : undefined}
         />
 
         <main className="flex-1 pb-16 min-w-0 w-full">
@@ -146,7 +151,7 @@ function AppContent() {
                   <div className="border-b border-[#e2eae1] pb-3 sm:pb-4">
                     <h2 className="text-lg sm:text-xl font-bold text-[#1c2720]">System Architecture & Settings</h2>
                     <p className="text-xs text-[#5e7063] mt-1">
-                      Agricultural Farm Management System (Oracle SQL DA2 → Redis Hash/Set DA3)
+                      Agricultural Farm Management System Architecture & Configuration
                     </p>
                   </div>
 
@@ -199,57 +204,6 @@ function AppContent() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Data Model Reference */}
-                  <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#e2eae1] space-y-4">
-                    <h3 className="text-sm font-bold text-[#1c2720]">
-                      Oracle SQL DA2 vs. Redis DA3 Schema Mapping
-                    </h3>
-                    <div className="overflow-x-auto text-xs w-full -mx-4 sm:mx-0 px-4 sm:px-0">
-                      <table className="w-full text-left min-w-[500px]">
-                        <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063]">
-                          <tr>
-                            <th className="py-2.5 px-3">Entity Type</th>
-                            <th className="py-2.5 px-3">Oracle DA2 Table</th>
-                            <th className="py-2.5 px-3">Redis Key Pattern</th>
-                            <th className="py-2.5 px-3">Relationship Sets</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#f0f4f0] font-mono text-[11px]">
-                          <tr>
-                            <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Farmer</td>
-                            <td className="py-2 px-3">FARMER</td>
-                            <td className="py-2 px-3 text-[#2d5a3f]">farmer:&lt;id&gt;</td>
-                            <td className="py-2 px-3">farmer:&lt;id&gt;:farms, farmer:&lt;id&gt;:phones</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Farm</td>
-                            <td className="py-2 px-3">FARM</td>
-                            <td className="py-2 px-3 text-[#2d5a3f]">farm:&lt;id&gt;</td>
-                            <td className="py-2 px-3">farm:&lt;id&gt;:fields, farm:&lt;id&gt;:workers</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Field</td>
-                            <td className="py-2 px-3">FIELD</td>
-                            <td className="py-2 px-3 text-[#2d5a3f]">field:&lt;id&gt;</td>
-                            <td className="py-2 px-3">field:&lt;id&gt;:soil_tests, field:&lt;id&gt;:harvests</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Crop & Variety</td>
-                            <td className="py-2 px-3">CROP, CROP_VARIETY</td>
-                            <td className="py-2 px-3 text-[#2d5a3f]">crop:&lt;id&gt;, crop_variety:&lt;id&gt;</td>
-                            <td className="py-2 px-3">crop:&lt;id&gt;:varieties, crop:&lt;id&gt;:seasons</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 font-sans font-medium text-[#1c2720]">Harvest & Sale</td>
-                            <td className="py-2 px-3">HARVEST, SALE</td>
-                            <td className="py-2 px-3 text-[#2d5a3f]">harvest:&lt;id&gt;, sale:&lt;id&gt;</td>
-                            <td className="py-2 px-3">harvest:&lt;id&gt;:sales, sale:&lt;id&gt;:payments</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -258,7 +212,12 @@ function AppContent() {
                 <EntityCrudView
                   key={currentEntityConfig.key}
                   config={currentEntityConfig}
-                  onNavigateToEntity={(entityKey) => setActiveView(entityKey)}
+                  externalSearch={headerSearch}
+                  onSearchChange={setHeaderSearch}
+                  onNavigateToEntity={(entityKey) => {
+                    setActiveView(entityKey);
+                    setHeaderSearch('');
+                  }}
                 />
               )}
             </>

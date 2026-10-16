@@ -1,5 +1,5 @@
 import { redis } from '../config/redis';
-import { initCounterIfLower } from '../utils/idGenerator';
+import { initCounterIfLower, syncCounterToMax } from '../utils/idGenerator';
 
 interface EntityIndexDef {
   name: string;
@@ -93,6 +93,7 @@ export async function initializeIndexes(): Promise<void> {
       if (numericIds.length > 0) {
         const maxId = Math.max(...numericIds);
         await initCounterIfLower(def.name, maxId);
+        await syncCounterToMax(def.name, def.indexKey);
       }
       console.log(`[Startup] Indexed ${scannedIds.length} records for ${def.name} (${def.indexKey})`);
     } else {

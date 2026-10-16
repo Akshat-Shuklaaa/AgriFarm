@@ -165,7 +165,7 @@ export function Sidebar({
           </div>
           <div>
             <h1 className="font-semibold text-sm tracking-tight text-[#1c2720]">AgriFarm SaaS</h1>
-            <p className="text-[11px] text-[#5e7063]">Redis DA3 System</p>
+            <p className="text-[11px] text-[#5e7063]">Agricultural DBMS</p>
           </div>
         </div>
         {isMobile && (
@@ -180,7 +180,7 @@ export function Sidebar({
       </div>
 
       {/* Redis Live Status Badge */}
-      <div className="px-4 sm:px-5 py-2.5 bg-[#f8faf7] border-b border-[#e2eae1] flex items-center justify-between text-xs">
+      <div className="px-4 sm:px-5 py-2.5 bg-[#f2f5f1] border-b border-[#e0e7df] flex items-center justify-between text-xs">
         <span className="text-[#5e7063] font-medium flex items-center gap-1.5">
           <span
             className={`w-2 h-2 rounded-full ${

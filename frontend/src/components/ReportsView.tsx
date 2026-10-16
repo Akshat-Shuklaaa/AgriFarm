@@ -186,7 +186,7 @@ export function ReportsView() {
             {selectedReport === 'farmers-farms' && (
               <div className="space-y-4">
                 {reportData.map((farmer: any) => (
-                  <div key={farmer.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e2eae1] bg-[#f8faf7] space-y-3">
+                  <div key={farmer.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e0e7df] bg-[#f7f9f6] space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="min-w-0">
                         <span className="inline-block font-mono text-[10px] text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded">
@@ -230,7 +230,7 @@ export function ReportsView() {
             {selectedReport === 'farms-fields' && (
               <div className="space-y-4">
                 {reportData.map((farm: any) => (
-                  <div key={farm.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e2eae1] bg-[#f8faf7] space-y-3">
+                  <div key={farm.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e0e7df] bg-[#f7f9f6] space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="min-w-0">
                         <span className="inline-block font-mono text-[10px] text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded">
@@ -274,7 +274,7 @@ export function ReportsView() {
             {selectedReport === 'crops-varieties' && (
               <div className="space-y-4">
                 {reportData.map((crop: any) => (
-                  <div key={crop.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e2eae1] bg-[#f8faf7] space-y-3">
+                  <div key={crop.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e0e7df] bg-[#f7f9f6] space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="min-w-0">
                         <span className="inline-block font-mono text-[10px] text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded">
@@ -318,7 +318,7 @@ export function ReportsView() {
             {selectedReport === 'low-stock' && (
               <div className="overflow-x-auto w-full -mx-4 sm:mx-0 px-4 sm:px-0">
                 <table className="w-full min-w-[560px] text-left text-xs">
-                  <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063]">
+                  <thead className="bg-[#f2f5f1] border-b border-[#e0e7df] text-[#5e7063]">
                     <tr>
                       <th className="py-2.5 px-3">Item ID</th>
                       <th className="py-2.5 px-3">Name</th>
@@ -360,7 +360,7 @@ export function ReportsView() {
             {selectedReport === 'equipment-maintenance' && (
               <div className="space-y-4">
                 {reportData.map((eq: any) => (
-                  <div key={eq.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e2eae1] bg-[#f8faf7] space-y-3">
+                  <div key={eq.id} className="p-3.5 sm:p-4 rounded-xl border border-[#e0e7df] bg-[#f7f9f6] space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="min-w-0">
                         <span className="inline-block font-mono text-[10px] text-[#2d5a3f] bg-[#eef3ed] px-2 py-0.5 rounded">
@@ -384,7 +384,7 @@ export function ReportsView() {
                         eq.maintenance.map((m: any) => (
                           <div
                             key={m.id}
-                            className="p-2.5 bg-white rounded-lg border border-[#e2eae1] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 text-xs"
+                            className="p-2.5 bg-white rounded-lg border border-[#e0e7df] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 text-xs"
                           >
                             <div className="min-w-0">
                               <span className="font-semibold text-[#1c2720]">{m.maintenance_type}</span>
@@ -407,7 +407,7 @@ export function ReportsView() {
             {selectedReport === 'sales-payments' && (
               <div className="overflow-x-auto w-full -mx-4 sm:mx-0 px-4 sm:px-0">
                 <table className="w-full min-w-[640px] text-left text-xs">
-                  <thead className="bg-[#f8faf7] border-b border-[#e2eae1] text-[#5e7063]">
+                  <thead className="bg-[#f2f5f1] border-b border-[#e0e7df] text-[#5e7063]">
                     <tr>
                       <th className="py-2.5 px-3">Invoice ID</th>
                       <th className="py-2.5 px-3">Customer</th>

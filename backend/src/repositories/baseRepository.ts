@@ -128,11 +128,34 @@ export class BaseRepository<T extends Record<string, any>> {
 
     // Apply search
     if (options.search && options.search.trim()) {
-      const searchTerms = options.search.toLowerCase().trim();
-      const fieldsToSearch = options.searchFields || ['name', 'title', 'description', 'email', 'phone'];
-      items = items.filter((item) =>
-        fieldsToSearch.some((f) => String(item[f] ?? '').toLowerCase().includes(searchTerms))
-      );
+      const rawTerm = options.search.trim();
+      const term = rawTerm.toLowerCase();
+      const strippedHash = term.startsWith('#') ? term.slice(1).trim() : term;
+
+      items = items.filter((item) => {
+        // Match primary ID or entity ID field (exact or partial, with or without leading hash)
+        const idVal = String(item.id ?? '').toLowerCase();
+        const entityIdVal = String(item[this.idField] ?? '').toLowerCase();
+        if (idVal === term || idVal === strippedHash || idVal.includes(strippedHash)) return true;
+        if (entityIdVal === term || entityIdVal === strippedHash || entityIdVal.includes(strippedHash)) return true;
+
+        // If explicit searchFields were requested, match against those
+        if (options.searchFields && options.searchFields.length > 0) {
+          return options.searchFields.some((f) => {
+            const val = item[f];
+            if (val === undefined || val === null) return false;
+            return String(val).toLowerCase().includes(term);
+          });
+        }
+
+        // By default, perform broad search across all string/numeric fields of the item
+        return Object.entries(item).some(([key, val]) => {
+          if (val === undefined || val === null) return false;
+          if (typeof val === 'object') return false;
+          const str = String(val).toLowerCase();
+          return str.includes(term);
+        });
+      });
     }
 
     // Apply sorting
@@ -167,7 +190,7 @@ export class BaseRepository<T extends Record<string, any>> {
     relationships: RelSetOperation[] = [],
     customId?: string
   ): Promise<T> {
-    const id = customId || (await getNextId(this.entityName));
+    const id = customId || (await getNextId(this.entityName, undefined, this.indexKey));
     const key = this.getKey(id);
 
     const cleanData: Record<string, string> = { [this.idField]: id };
@@ -260,6 +283,22 @@ export class BaseRepository<T extends Record<string, any>> {
     }
 
     await pipeline.exec();
+
+    // If the deleted record was the highest numeric ID, re-sync counter to avoid sequence gaps
+    const numericId = parseInt(String(id), 10);
+    if (!isNaN(numericId)) {
+      const counterKey = `counter:${this.entityName}`;
+      const current = await redis.get(counterKey);
+      if (current && parseInt(current, 10) === numericId) {
+        const members = await redis.smembers(this.indexKey);
+        const remainingNumeric = members.map((m) => parseInt(m, 10)).filter((n) => !isNaN(n));
+        const newMax = remainingNumeric.length > 0 ? Math.max(...remainingNumeric) : 0;
+        if (newMax > 0) {
+          await redis.set(counterKey, newMax.toString());
+        }
+      }
+    }
+
     return { success: true };
   }
 
