@@ -12,6 +12,8 @@
     "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run build",
     "seed": "npm --prefix backend run seed",
     "seed:dry-run": "npm --prefix backend run seed:dry-run",
+    "db:seed": "npm --prefix backend run seed",
+    "db:seed:dry-run": "npm --prefix backend run seed:dry-run",
     "bootstrap:admin": "npm --prefix backend run bootstrap:admin",
     "seed:users": "npm --prefix backend run seed:users",
     "test:auth": "npm --prefix backend run test:auth"
